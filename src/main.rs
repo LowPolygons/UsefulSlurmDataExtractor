@@ -1,4 +1,4 @@
-use std::io::{self, Read};
+use std::io::{self, IsTerminal, Read};
 
 use chrono::DateTime;
 use serde::de::DeserializeOwned;
@@ -15,8 +15,16 @@ pub fn json_string_to_struct<T: DeserializeOwned>(stringy_json: String) -> Resul
 
 fn main() {
     let mut input = String::new();
-    io::stdin().read_to_string(&mut input).map_err(|_| {
-        println!("Failed to read user input - did you run it like 'slurm --json | UsefulSlurmDataExtractor' ?");
+
+    if io::stdin().is_terminal() {
+        println!(
+            "User did not provide any input - did you run it like 'squeue --json | UsefulSlurmDataExtractor' ?"
+        );
+        return ();
+    }
+
+    let _ = io::stdin().read_to_string(&mut input).map_err(|_| {
+        println!("Failed to read user input - did you run it like 'squeue --json | UsefulSlurmDataExtractor' ?");
         return ();
     });
 
@@ -24,7 +32,7 @@ fn main() {
         Ok(val) => val,
         Err(_) => {
             println!(
-                "Failed to format input properly - did you run it like 'slurm --json | UsefulSlurmDataExtractor' ?"
+                "Failed to format input properly - did you run it like 'squeue --json | UsefulSlurmDataExtractor' ?"
             );
             return ();
         }
