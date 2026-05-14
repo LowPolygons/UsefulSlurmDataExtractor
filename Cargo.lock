@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "ProperSlurmData"
+name = "UsefulSlurmDataExtractor"
 version = "0.1.0"
 dependencies = [
  "chrono",
