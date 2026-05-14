@@ -41,6 +41,10 @@ fn main() {
     structure.jobs.iter().for_each(|job_data| {
         println!("==========================");
         println!("Job Name & ID: {}, {}", job_data.name, job_data.job_id);
+        println!(
+            "User Name and ID: {}, {}",
+            job_data.user_name, job_data.user_id
+        );
         println!("--------------------------");
         println!(
             "Submit Time: {}",
