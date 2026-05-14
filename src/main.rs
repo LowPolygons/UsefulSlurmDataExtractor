@@ -6,8 +6,7 @@ use serde::de::DeserializeOwned;
 mod slurm_data;
 
 pub fn json_string_to_struct<T: DeserializeOwned>(stringy_json: String) -> Result<T, ()> {
-    let structy_value = serde_json::from_str(&stringy_json).map_err(|e| {
-        println!("{}", e);
+    let structy_value = serde_json::from_str(&stringy_json).map_err(|_| {
         return ();
     })?;
 
@@ -16,12 +15,17 @@ pub fn json_string_to_struct<T: DeserializeOwned>(stringy_json: String) -> Resul
 
 fn main() {
     let mut input = String::new();
-    io::stdin().read_to_string(&mut input).unwrap();
+    io::stdin().read_to_string(&mut input).map_err(|_| {
+        println!("Failed to read user input - did you run it like 'slurm --json | UsefulSlurmDataExtractor' ?");
+        return ();
+    });
 
     let structure: slurm_data::SlurmData = match json_string_to_struct(input) {
         Ok(val) => val,
         Err(_) => {
-            println!("Failed");
+            println!(
+                "Failed to format input properly - did you run it like 'slurm --json | UsefulSlurmDataExtractor' ?"
+            );
             return ();
         }
     };
