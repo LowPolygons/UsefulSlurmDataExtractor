@@ -1,0 +1,46 @@
+use std::io::{self, Read};
+
+use chrono::DateTime;
+use serde::de::DeserializeOwned;
+
+mod slurm_data;
+
+pub fn json_string_to_struct<T: DeserializeOwned>(stringy_json: String) -> Result<T, ()> {
+    let structy_value = serde_json::from_str(&stringy_json).map_err(|e| {
+        println!("{}", e);
+        return ();
+    })?;
+
+    Ok(structy_value)
+}
+
+fn main() {
+    let mut input = String::new();
+    io::stdin().read_to_string(&mut input).unwrap();
+
+    let structure: slurm_data::SlurmData = match json_string_to_struct(input) {
+        Ok(val) => val,
+        Err(_) => {
+            println!("Failed");
+            return ();
+        }
+    };
+
+    structure.jobs.iter().for_each(|job_data| {
+        println!("==========================");
+        println!("Job Name & ID: {}, {}", job_data.name, job_data.job_id);
+        println!("--------------------------");
+        println!(
+            "Submit Time: {}",
+            DateTime::from_timestamp(job_data.submit_time as i64, 0).expect("Conversion Failure")
+        );
+        println!(
+            "Latest Start Time: {}",
+            DateTime::from_timestamp(job_data.start_time as i64, 0).expect("Conversion Failure")
+        );
+    });
+
+    println!("==========================");
+    println!("Listed info for {} jobs", structure.jobs.len());
+    println!("==========================");
+}
