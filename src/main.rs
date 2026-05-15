@@ -54,6 +54,7 @@ fn main() {
             "Latest Start Time: {}",
             DateTime::from_timestamp(job_data.start_time as i64, 0).expect("Conversion Failure")
         );
+        println!("Job status: {}", job_data.job_state);
     });
 
     println!("==========================");
