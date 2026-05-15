@@ -19,7 +19,7 @@ pub enum Commands {
         filter: FilterOptions,
 
         #[arg(long, required = false)]
-        job_id: Option<i32>,
+        job_id: Option<u64>,
     },
 
     #[command(about = "Used to aid in swiftly cancelling unwanted jobs")]

@@ -11,7 +11,7 @@ mod containers;
 
 use crate::{
     cli::{Cli, Commands},
-    commands::{list, system_capacity},
+    commands::{detail, list, system_capacity},
     containers::slurm_data,
 };
 
@@ -54,9 +54,7 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
 
     let success: Result<(), ()> = match &cli.command {
-        Commands::Detail { filter, job_id } => {
-            unimplemented!();
-        }
+        Commands::Detail { filter, job_id } => detail::command(&structure, filter, job_id),
         Commands::CancelHelp { filter, directory } => {
             unimplemented!()
         }
