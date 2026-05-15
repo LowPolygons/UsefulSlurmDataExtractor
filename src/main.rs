@@ -3,7 +3,8 @@ use std::io::{self, IsTerminal, Read};
 use chrono::DateTime;
 use serde::de::DeserializeOwned;
 
-mod slurm_data;
+mod containers;
+use crate::containers::slurm_data;
 
 pub fn json_string_to_struct<T: DeserializeOwned>(stringy_json: String) -> Result<T, ()> {
     let structy_value = serde_json::from_str(&stringy_json).map_err(|_| {
