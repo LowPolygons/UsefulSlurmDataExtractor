@@ -34,7 +34,7 @@ Only lists pending jobs
 ... | SlurmHelper --detailed --filter status pending
 ```
 
-Only lists jobs which are in `/x/y/z`
+Only lists jobs which are in `x/y/z`
 ```sh
 ... | SlurmHelper --detailed --filter directory x/y/z 
 ```
@@ -62,7 +62,7 @@ Only lists pending jobs
 ... | SlurmHelper --cancel-help --filter status pending
 ```
 
-Only lists jobs which are in `/x/y/z`
+Only lists jobs which are in `x/y/z`
 ```sh
 ... | SlurmHelper --cancel-help --filter directory x/y/z 
 ```
@@ -75,3 +75,49 @@ Alternatively, the user has an option to bypass the interactive menu to cancel a
 ```sh
 ... | SlurmHelper --cancel-help --directory x/y/z 
 ```
+
+#### `--filter` Options
+- Directory
+- Name
+- Job Status
+- Num Nodes
+- Department/Account
+- Username
+
+### List Working Directory
+
+Potential Usage:
+```sh
+... | SlurmHelper --list-directory
+```
+
+Picking the file can be similar to detailed mode
+
+It then lists the files in that directory
+
+### View Output File Tail
+
+Potential Usage:
+```sh
+... | SlurmHelper --tail-output [num lines]
+```
+
+Picking the file can be similar to detailed mode
+
+It then prints the last [num lines] lines in the output file
+
+Alternatively, a flag can be passed which will just open the output file in your editor
+```sh
+... | SlurmHelper --tail-output --editor
+```
+
+### System Capacity
+
+Potential Usage
+```sh
+... | SlurmHerlp --system-capacity
+```
+
+Takes the list of jobs and prints useful information relating to how 'full' the queue is
+
+For example, it may print that thwere are 500 jobs, 50 are running and 450 are PENDING

@@ -140,6 +140,7 @@ pub struct SlurmJob {
     pub submit_time: u64,
     pub suspend_time: i16,
     pub system_comment: String,
+    // INFO: the Number here is stored in minutes
     pub time_limit: SlurmSetInfiniteNumberContainer,
     pub time_minimum: SlurmSetInfiniteNumberContainer,
     pub threads_per_core: SlurmSetInfiniteNumberContainer,
