@@ -1,6 +1,6 @@
 # SlurmHelper
 
-Right now, this will extract some info about each slurm command and tell you the formatted start and expected run date of it
+A CLI for extracting useful information from SLURM on HPC systems
 
 ## Usage
 
