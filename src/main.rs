@@ -11,7 +11,7 @@ mod containers;
 
 use crate::{
     cli::{Cli, Commands},
-    commands::list,
+    commands::{list, system_capacity},
     containers::slurm_data,
 };
 
@@ -66,7 +66,7 @@ fn main() -> ExitCode {
         Commands::TailOutput { filter, editor } => {
             unimplemented!()
         }
-        Commands::SystemCapacity => unimplemented!(),
+        Commands::SystemCapacity => system_capacity::command(&structure),
         Commands::List => list::command(&structure),
     };
 
