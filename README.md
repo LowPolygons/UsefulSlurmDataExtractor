@@ -1,4 +1,4 @@
-# UsefulSlurmDataExtractor
+# SlurmHelper
 
 Right now, this will extract some info about each slurm command and tell you the formatted start and expected run date of it
 
@@ -7,10 +7,10 @@ Right now, this will extract some info about each slurm command and tell you the
 Compile the program and add the `target/release` directory to your $PATH
 
 ```sh
-squeue --json | UsefulSlurmDataExtractor
+squeue --json | SlurmHelper
 ```
 Or
 ```sh
-squeue --json --m | UsefulSlurmDataExtractor
+squeue --json --m | SlurmHelper
 ```
 
