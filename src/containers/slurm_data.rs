@@ -20,7 +20,7 @@ pub struct SlurmMeta {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SlurmMetaSlurm {
-    pub version: HashMap<String, i32>,
+    pub version: HashMap<String, i64>,
     pub release: String,
 }
 
@@ -34,7 +34,7 @@ pub struct SlurmJob {
     pub array_task_id: SlurmSetInfiniteNumberContainer,
     pub array_max_tasks: SlurmSetInfiniteNumberContainer,
     pub array_task_string: String,
-    pub association_id: i16,
+    pub association_id: i64,
     pub batch_features: String,
     pub batch_flag: bool,
     pub batch_host: String,
@@ -48,8 +48,8 @@ pub struct SlurmJob {
     pub container: String,
     pub container_id: String,
     pub contiguous: bool,
-    pub core_spec: i16,
-    pub thread_spec: i16,
+    pub core_spec: i64,
+    pub thread_spec: i64,
     pub cores_per_socket: SlurmSetInfiniteNumberContainer,
     pub billable_tres: SlurmSetInfiniteNumberContainer,
     pub cpus_per_task: SlurmSetInfiniteNumberContainer,
@@ -58,7 +58,7 @@ pub struct SlurmJob {
     pub cpu_frequency_governor: SlurmSetInfiniteNumberContainer,
     pub cpus_per_tres: String,
     pub cron: String,
-    pub deadline: i32,
+    pub deadline: i64,
     pub delay_boot: SlurmSetInfiniteNumberContainer,
     pub dependency: String,
     pub derived_exit_code: SlurmSetInfiniteNumberContainer,
@@ -93,7 +93,7 @@ pub struct SlurmJob {
     pub name: String,
     pub network: String,
     pub nodes: String,
-    pub nice: i16,
+    pub nice: i64,
     pub tasks_per_core: SlurmSetInfiniteNumberContainer,
     pub tasks_per_tres: SlurmSetInfiniteNumberContainer,
     pub tasks_per_node: SlurmSetInfiniteNumberContainer,
@@ -109,19 +109,19 @@ pub struct SlurmJob {
     pub minimum_cpus_per_node: SlurmSetInfiniteNumberContainer,
     pub minimum_tmp_disk_per_node: SlurmSetInfiniteNumberContainer,
     pub power: HashMap<String, Vec<String>>,
-    pub preempt_time: i16,
-    pub preemptable_time: i16,
-    pub pre_sus_time: i16,
+    pub preempt_time: i64,
+    pub preemptable_time: i64,
+    pub pre_sus_time: i64,
     pub hold: bool,
     pub priority: SlurmSetInfiniteNumberContainer,
     pub profile: Vec<String>,
     pub qos: String,
     pub reboot: bool,
     pub required_nodes: String,
-    pub minimum_switches: i16,
+    pub minimum_switches: i64,
     pub requeue: bool,
-    pub resize_time: i16,
-    pub restart_cnt: i16,
+    pub resize_time: i64,
+    pub restart_cnt: i64,
     pub resv_name: String,
     pub scheduled_nodes: String,
     pub selinux_context: String,
@@ -129,7 +129,7 @@ pub struct SlurmJob {
     pub exclusive: Vec<String>,
     pub oversubscribe: bool,
     pub show_flags: Vec<String>,
-    pub sockets_per_board: i16,
+    pub sockets_per_board: i64,
     pub sockets_per_node: SlurmSetInfiniteNumberContainer,
     pub start_time: u64,
     pub state_description: String,
@@ -138,7 +138,7 @@ pub struct SlurmJob {
     pub standard_input: String,
     pub standard_output: String,
     pub submit_time: u64,
-    pub suspend_time: i16,
+    pub suspend_time: i64,
     pub system_comment: String,
     // INFO: the Number here is stored in minutes
     pub time_limit: SlurmSetInfiniteNumberContainer,
@@ -154,7 +154,7 @@ pub struct SlurmJob {
     pub tres_alloc_str: String,
     pub user_id: u64,
     pub user_name: String,
-    pub maximum_switch_wait_time: i16,
+    pub maximum_switch_wait_time: i64,
     pub wckey: String,
     pub current_working_directory: String,
 }
@@ -169,9 +169,9 @@ pub struct SlurmSetInfiniteNumberContainer {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SlurmJobResources {
     pub nodes: Option<String>,
-    pub allocated_cores: Option<i16>,
-    pub allocated_cpus: Option<i16>,
-    pub allocated_hosts: Option<i16>,
+    pub allocated_cores: Option<i64>,
+    pub allocated_cpus: Option<i64>,
+    pub allocated_hosts: Option<i64>,
     pub allocated_nodes: Option<Vec<SlurmAllocatedNodes>>,
 }
 
@@ -179,7 +179,7 @@ pub struct SlurmJobResources {
 pub struct SlurmAllocatedNodes {
     pub sockets: HashMap<String, HashMap<String, HashMap<String, String>>>,
     pub nodename: String,
-    pub cpus_used: i16,
+    pub cpus_used: i64,
     pub memory_used: i64,
     pub memory_allocated: i64,
 }
