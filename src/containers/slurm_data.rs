@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 pub struct SlurmData {
     pub meta: SlurmMeta,
     pub jobs: Vec<SlurmJob>,
-    pub warnings: Vec<String>,
-    pub errors: Vec<String>,
+    pub warnings: Vec<HashMap<String, String>>,
+    pub errors: Vec<HashMap<String, String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
