@@ -8,6 +8,7 @@ use serde::de::DeserializeOwned;
 mod cli;
 mod commands;
 mod containers;
+mod systems;
 
 use crate::{
     cli::{Cli, Commands},
@@ -55,14 +56,26 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
 
     let success: Result<(), ()> = match &cli.command {
-        Commands::Detail { filter, job_id } => detail::command(&structure, filter, job_id),
-        Commands::CancelHelp { filter, directory } => {
+        Commands::Detail {
+            job_id,
+            filter,
+            values,
+        } => detail::command(&structure, job_id, filter, values),
+        Commands::CancelHelp {
+            directory,
+            filter,
+            values,
+        } => {
             unimplemented!()
         }
-        Commands::ListDirectory { filter } => {
+        Commands::ListDirectory { filter, values } => {
             unimplemented!()
         }
-        Commands::TailOutput { filter, editor } => {
+        Commands::TailOutput {
+            filter,
+            values,
+            editor,
+        } => {
             unimplemented!()
         }
         Commands::SystemCapacity => system_capacity::command(&structure),

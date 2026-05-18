@@ -13,8 +13,9 @@ use crate::{
 
 pub fn command(
     structure: &SlurmData,
-    filter: &FilterOptions,
     job_id: &Option<u64>,
+    filter: &FilterOptions,
+    values: &Vec<String>,
 ) -> Result<(), ()> {
     if let Some(id) = job_id {
         let job_ids = structure
