@@ -24,6 +24,6 @@ impl NumNodesFilter {
 
 impl Filterable for NumNodesFilter {
     fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        todo!()
+        self.node_counts.contains(&(job.node_count.number as u16))
     }
 }

@@ -15,6 +15,6 @@ impl AccountFilter {
 
 impl Filterable for AccountFilter {
     fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        todo!()
+        self.account_names.contains(&job.account)
     }
 }

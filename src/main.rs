@@ -80,7 +80,7 @@ fn main() -> ExitCode {
             unimplemented!()
         }
         Commands::SystemCapacity => system_capacity::command(&structure),
-        Commands::List => list::command(&structure),
+        Commands::List { filter, values } => list::command(&structure, filter, values),
     };
 
     match success {

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SlurmData {
     pub meta: SlurmMeta,
     pub jobs: Vec<SlurmJob>,
@@ -10,7 +10,7 @@ pub struct SlurmData {
     pub errors: Vec<HashMap<String, String>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmMeta {
     pub command: Vec<String>,
     pub plugins: HashMap<String, String>,
@@ -18,13 +18,13 @@ pub struct SlurmMeta {
     pub slurm: SlurmMetaSlurm,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmMetaSlurm {
     pub version: HashMap<String, i64>,
     pub release: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmJob {
     pub account: String,
     pub accrue_time: i64,
@@ -159,14 +159,14 @@ pub struct SlurmJob {
     pub current_working_directory: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmSetInfiniteNumberContainer {
     pub set: bool,
     pub infinite: bool,
     pub number: f32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmJobResources {
     pub nodes: Option<String>,
     pub allocated_cores: Option<i64>,
@@ -175,7 +175,7 @@ pub struct SlurmJobResources {
     pub allocated_nodes: Option<Vec<SlurmAllocatedNodes>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmAllocatedNodes {
     pub sockets: HashMap<String, HashMap<String, HashMap<String, String>>>,
     pub nodename: String,

@@ -12,6 +12,13 @@ impl JobNameFilter {
 
 impl Filterable for JobNameFilter {
     fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        todo!()
+        let mut success: bool = false;
+        self.name_contains.iter().for_each(|dir| {
+            if job.name.contains(dir) {
+                success = true;
+            }
+        });
+
+        success
     }
 }

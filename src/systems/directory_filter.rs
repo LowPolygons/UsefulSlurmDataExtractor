@@ -12,6 +12,13 @@ impl DirectoryFilter {
 
 impl Filterable for DirectoryFilter {
     fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        todo!()
+        let mut success: bool = false;
+        self.directories.iter().for_each(|dir| {
+            if job.current_working_directory.contains(dir) {
+                success = true;
+            }
+        });
+
+        success
     }
 }

@@ -2,11 +2,33 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use chrono::DateTime;
 
-use crate::{containers::slurm_data::SlurmData, utils::secs_to_nice_time::secs_to_nice_time};
+use crate::{
+    cli::FilterOptions, containers::slurm_data::SlurmData, systems::filter::get_filter_object,
+    utils::secs_to_nice_time::secs_to_nice_time,
+};
 
-pub fn command(slurm_data: &SlurmData) -> Result<(), ()> {
-    slurm_data
-        .jobs
+pub fn command(
+    slurm_data: &SlurmData,
+    filter: &Option<FilterOptions>,
+    values: &Vec<String>,
+) -> Result<(), ()> {
+    let filtered_data = match filter {
+        Some(filter_option) => {
+            if let Some(filter) = get_filter_object(filter_option, values.clone()) {
+                slurm_data
+                    .jobs
+                    .clone()
+                    .into_iter()
+                    .filter(|job| filter.does_job_meet_filter_reqs(job))
+                    .collect()
+            } else {
+                slurm_data.jobs.clone()
+            }
+        }
+        None => slurm_data.jobs.clone(),
+    };
+
+    filtered_data
         .iter()
         .try_for_each(|job_data| -> Result<(), ()> {
             println!("==========================");
@@ -44,7 +66,7 @@ pub fn command(slurm_data: &SlurmData) -> Result<(), ()> {
         .map_err(|_| ())?;
 
     println!("==========================");
-    println!("Listed info for {} jobs", slurm_data.jobs.len());
+    println!("Listed info for {} jobs", filtered_data.len());
     println!("==========================");
 
     Ok(())

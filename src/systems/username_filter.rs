@@ -15,6 +15,6 @@ impl UsernameFilter {
 
 impl Filterable for UsernameFilter {
     fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        todo!()
+        self.usernames.contains(&job.user_name)
     }
 }

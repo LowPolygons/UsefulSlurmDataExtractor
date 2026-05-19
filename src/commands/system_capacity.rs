@@ -7,12 +7,6 @@ pub fn command(structure: &SlurmData) -> Result<(), ()> {
             "RUNNING" => vec[0] = vec[0] + 1,
             _ => {}
         }
-        // if !job.dependency.is_empty() {
-        //     println!(
-        //         "{} and {} and {}!",
-        //         job.job_id, job.dependency, job.state_reason
-        //     );
-        // }
         return vec;
     });
 

@@ -12,6 +12,6 @@ impl JobStatusFilter {
 
 impl Filterable for JobStatusFilter {
     fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        todo!()
+        self.status.contains(&job.job_state)
     }
 }

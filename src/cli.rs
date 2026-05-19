@@ -64,7 +64,13 @@ pub enum Commands {
     SystemCapacity,
 
     #[command(about = "See basic infomation about all current jobs in the list")]
-    List,
+    List {
+        #[arg(long, value_enum)]
+        filter: Option<FilterOptions>,
+
+        #[arg(required = false, num_args = 1..)]
+        values: Vec<String>,
+    },
 }
 
 #[derive(Parser)]
