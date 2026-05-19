@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{cmp::min, path::Path};
 
 use dialoguer::{Select, theme::ColorfulTheme};
 
@@ -40,8 +40,6 @@ pub fn command(
 
     let output_file = Path::new(&filtered_data[selection].standard_output);
 
-    let num_lines_to_show: usize = num_lines.unwrap_or(30).into();
-
     if output_file.try_exists().map_err(|_| {
         println!("Couldn't validate if the output file exists");
         return ();
@@ -50,6 +48,9 @@ pub fn command(
             println!("{e}");
             return ();
         })?;
+
+        // Clamp so there are no underflows
+        let num_lines_to_show: usize = min(num_lines.unwrap_or(30).into(), lines.len());
 
         println!("------------------------");
         println!("The last {} lines of the output file: ", num_lines_to_show);
