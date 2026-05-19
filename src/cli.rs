@@ -18,8 +18,8 @@ pub enum Commands {
         #[arg(long, required = false)]
         job_id: Option<u64>,
 
-        #[arg(long, value_enum, default_value_t = FilterOptions::None)]
-        filter: FilterOptions,
+        #[arg(long, value_enum)]
+        filter: Option<FilterOptions>,
 
         #[arg(required = false, num_args = 1..)]
         values: Vec<String>,
@@ -30,8 +30,8 @@ pub enum Commands {
         #[arg(long, default_value_t = String::from(""))]
         directory: String,
 
-        #[arg(long, value_enum, default_value_t = FilterOptions::None)]
-        filter: FilterOptions,
+        #[arg(long, value_enum)]
+        filter: Option<FilterOptions>,
 
         #[arg(required = false, num_args = 1..)]
         values: Vec<String>,
@@ -39,8 +39,8 @@ pub enum Commands {
 
     #[command(about = "Used to see the list of files in the directory a job was from")]
     ListDirectory {
-        #[arg(long, value_enum, default_value_t = FilterOptions::None)]
-        filter: FilterOptions,
+        #[arg(long, value_enum)]
+        filter: Option<FilterOptions>,
 
         #[arg(required = false, num_args = 1..)]
         values: Vec<String>,
@@ -48,8 +48,8 @@ pub enum Commands {
 
     #[command(about = "Used to view the tail (or full in the editor) of the output file for a job")]
     TailOutput {
-        #[arg(long, value_enum, default_value_t = FilterOptions::None)]
-        filter: FilterOptions,
+        #[arg(long, value_enum)]
+        filter: Option<FilterOptions>,
 
         #[arg(required = false, num_args = 1..)]
         values: Vec<String>,

@@ -3,8 +3,11 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use chrono::DateTime;
 
 use crate::{
-    cli::FilterOptions, containers::slurm_data::SlurmData, systems::filter::get_filter_object,
-    utils::secs_to_nice_time::secs_to_nice_time,
+    cli::FilterOptions,
+    containers::slurm_data::SlurmData,
+    utils::{
+        filtered_data_from_list::filtered_data_from_list, secs_to_nice_time::secs_to_nice_time,
+    },
 };
 
 pub fn command(
@@ -12,21 +15,7 @@ pub fn command(
     filter: &Option<FilterOptions>,
     values: &Vec<String>,
 ) -> Result<(), ()> {
-    let filtered_data = match filter {
-        Some(filter_option) => {
-            if let Some(filter) = get_filter_object(filter_option, values.clone()) {
-                slurm_data
-                    .jobs
-                    .clone()
-                    .into_iter()
-                    .filter(|job| filter.does_job_meet_filter_reqs(job))
-                    .collect()
-            } else {
-                slurm_data.jobs.clone()
-            }
-        }
-        None => slurm_data.jobs.clone(),
-    };
+    let filtered_data = filtered_data_from_list(slurm_data, filter, values);
 
     filtered_data
         .iter()

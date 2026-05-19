@@ -6,17 +6,20 @@ use std::{
 };
 
 use chrono::DateTime;
+use dialoguer::{Select, theme::ColorfulTheme};
 
 use crate::{
     cli::FilterOptions,
     containers::slurm_data::{SlurmData, SlurmJob},
-    utils::secs_to_nice_time::secs_to_nice_time,
+    utils::{
+        filtered_data_from_list::filtered_data_from_list, secs_to_nice_time::secs_to_nice_time,
+    },
 };
 
 pub fn command(
     structure: &SlurmData,
     job_id: &Option<u64>,
-    filter: &FilterOptions,
+    filter: &Option<FilterOptions>,
     values: &Vec<String>,
 ) -> Result<(), ()> {
     if let Some(id) = job_id {
@@ -38,7 +41,31 @@ pub fn command(
                 return ();
             })?;
         }
+        return Ok(());
     }
+    let filtered_data: Vec<SlurmJob> = filtered_data_from_list(structure, filter, values);
+
+    let selection_info: Vec<String> = filtered_data.iter().fold(Vec::new(), |mut vec, job| {
+        vec.push(format!(
+            "Name and ID: {}, {} | User Name: {} | Status: {}",
+            job.name, job.job_id, job.user_name, job.job_state
+        ));
+
+        vec
+    });
+
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose a job to view in more detail")
+        .items(&selection_info)
+        .default(0)
+        .interact()
+        .map_err(|_| ())?;
+
+    print_infomation_about_file(&filtered_data[selection]).map_err(|e| {
+        println!("Error: {e}");
+        return ();
+    })?;
+
     Ok(())
 }
 
