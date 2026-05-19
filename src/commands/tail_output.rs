@@ -1,7 +1,5 @@
 use std::{cmp::min, path::Path};
 
-use dialoguer::{Select, theme::ColorfulTheme};
-
 use crate::{
     cli::FilterOptions,
     commands::{get_job_selection_through_menu, line_vec_from_file},

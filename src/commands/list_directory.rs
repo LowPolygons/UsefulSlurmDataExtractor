@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use dialoguer::{Select, theme::ColorfulTheme};
 
 use crate::{
     cli::FilterOptions,

@@ -1,6 +1,6 @@
 use crate::{
     containers::slurm_data::SlurmJob,
-    systems::{directory_filter::DirectoryFilter, filter::Filterable},
+    systems::filter::Filterable,
 };
 
 pub struct AccountFilter {

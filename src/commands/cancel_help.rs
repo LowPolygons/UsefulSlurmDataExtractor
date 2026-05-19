@@ -1,4 +1,4 @@
-use std::{env, iter::Filter};
+use std::env;
 
 use dialoguer::{Select, theme::ColorfulTheme};
 
@@ -87,6 +87,6 @@ pub fn command(
     })?;
 
     println!("Wrote the file 'slurm_helper_cancel_script.sh' to your current directory.");
-    // Write cancel script.sh
+
     Ok(())
 }

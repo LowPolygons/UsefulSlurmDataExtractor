@@ -1,7 +1,7 @@
 use crate::{
     cli::FilterOptions,
     containers::slurm_data::{SlurmData, SlurmJob},
-    systems::filter::{self, get_filter_object},
+    systems::filter::get_filter_object,
 };
 
 pub fn filtered_data_from_list(

@@ -1,7 +1,6 @@
 use std::{
     fs::File,
     io::{self, BufRead},
-    path::Path,
 };
 
 use dialoguer::{Select, theme::ColorfulTheme};

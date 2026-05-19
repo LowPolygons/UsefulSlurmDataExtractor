@@ -1,13 +1,11 @@
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use chrono::DateTime;
 
 use crate::{
     cli::FilterOptions,
     containers::slurm_data::SlurmData,
     utils::{
         filtered_data_from_list::filtered_data_from_list,
-        print_common_job_info::print_common_job_info, secs_to_nice_time::secs_to_nice_time,
+        print_common_job_info::print_common_job_info,
     },
 };
 
