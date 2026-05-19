@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, process::Command};
 
 use dialoguer::{Select, theme::ColorfulTheme};
 
@@ -57,17 +57,26 @@ pub fn command(
         })?;
 
         let options = vec!["Back", "Cancel Job"];
-        let selection = Select::with_theme(&ColorfulTheme::default())
+        let inner_selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Do you wish to cancel the job?")
             .items(&options)
             .default(0)
             .interact()
             .map_err(|_| ())?;
 
-        if selection == 0 {
+        if inner_selection == 0 {
             continue;
         } else {
-            println!("Cancelling Job (TODO: Code execution)");
+            println!(
+                "Cancelling Job with ID {}..",
+                filtered_data[selection - 1].job_id
+            );
+            Command::new(format!("scancel {}", filtered_data[selection - 1].job_id))
+                .output()
+                .map_err(|_| {
+                    println!("Failed to execute the cancel command");
+                    return ();
+                })?;
         }
     }
 }
