@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use dialoguer::{Select, theme::ColorfulTheme};
 
 use crate::{
     cli::FilterOptions,
@@ -41,21 +42,34 @@ pub fn command(
     }
     let filtered_data: Vec<SlurmJob> = filtered_data_from_list(structure, filter, values);
 
-    let default_options: Vec<String> = vec![String::from("Finish")];
+    loop {
+        let default_options: Vec<String> = vec![String::from("Finish")];
+        let selection: usize =
+            get_job_selection_through_menu(&filtered_data, default_options).map_err(|_| ())?;
 
-    let selection: usize =
-        get_job_selection_through_menu(&filtered_data, default_options).map_err(|_| ())?;
+        if selection == 0 {
+            return Ok(());
+        }
 
-    if selection == 0 {
-        return Ok(());
+        print_infomation_about_file(&filtered_data[selection - 1]).map_err(|e| {
+            println!("Error: {e}");
+            return ();
+        })?;
+
+        let options = vec!["Back", "Cancel Job"];
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Do you wish to cancel the job?")
+            .items(&options)
+            .default(0)
+            .interact()
+            .map_err(|_| ())?;
+
+        if selection == 0 {
+            continue;
+        } else {
+            println!("Cancelling Job (TODO: Code execution)");
+        }
     }
-
-    print_infomation_about_file(&filtered_data[selection - 1]).map_err(|e| {
-        println!("Error: {e}");
-        return ();
-    })?;
-    // }
-    Ok(())
 }
 
 fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
@@ -103,10 +117,9 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
 }
 
 fn try_print_any_output_file(file: &Path, target_job: &SlurmJob) -> Result<(), String> {
-    if file
-        .try_exists()
-        .map_err(|_| String::from("Couldn't determine if output file exists"))?
-    {
+    if file.try_exists().map_err(|_| {
+        String::from("Couldn't determine if output file exists. You may not have access rights")
+    })? {
         let lines = line_vec_from_file(&target_job.standard_output).map_err(|e| {
             return e;
         })?;
