@@ -2,10 +2,8 @@ use std::{
     fs::File,
     io::{self, BufRead},
     path::Path,
-    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use chrono::DateTime;
 use dialoguer::{Select, theme::ColorfulTheme};
 
 use crate::{
@@ -13,7 +11,8 @@ use crate::{
     containers::slurm_data::{SlurmData, SlurmJob},
     utils::{
         filtered_data_from_list::filtered_data_from_list,
-        print_common_job_info::print_common_job_info, secs_to_nice_time::secs_to_nice_time,
+        print_common_job_info::print_common_job_info,
+        print_working_directory::print_working_directory,
     },
 };
 
@@ -81,10 +80,13 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     print_common_job_info(target_job)?;
 
     println!("--------------------------");
+
     println!("Files in working directory:");
     let working_directory = Path::new(&target_job.current_working_directory);
-    print_working_directory(working_directory)?;
+    print_working_directory(working_directory, true)?;
+
     println!("--------------------------");
+
     println!(
         "Job max length: {} hours",
         target_job.time_limit.number / 60.0
@@ -94,6 +96,7 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
         "Number of tasks per node: {}",
         target_job.tasks_per_node.number
     );
+
     println!("--------------------------");
     // Output file if it exists
     let output_file = Path::new(&target_job.standard_output);
@@ -113,34 +116,6 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     try_print_any_output_file(error_file, target_job)
         .map_err(|e| format!("Error printing error file: {e}"))?;
 
-    Ok(())
-}
-
-fn print_working_directory(working_directory: &Path) -> Result<(), String> {
-    if working_directory
-        .try_exists()
-        .map_err(|_| String::from("Couldn't determine if working directory exists"))?
-        && working_directory.is_dir()
-    {
-        let mut elements_in_dir = working_directory
-            .read_dir()
-            .map_err(|_| String::from("Failed to get elements in directory"))?;
-
-        elements_in_dir.try_for_each(|elem| -> Result<(), String> {
-            let path = elem
-                .map_err(|_| String::from("Bad element in directory"))?
-                .path();
-
-            if path.is_dir() {
-                println!("..Dir.. {:?}", path);
-            } else {
-                println!("..File.. {:?}", path);
-            }
-            Ok(())
-        })?;
-    } else {
-        println!("Couldn't find working directory");
-    }
     Ok(())
 }
 
