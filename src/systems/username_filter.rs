@@ -1,7 +1,4 @@
-use crate::{
-    containers::slurm_data::SlurmJob,
-    systems::{directory_filter::DirectoryFilter, filter::Filterable},
-};
+use crate::{containers::slurm_data::SlurmJob, systems::filter::Filterable};
 
 pub struct UsernameFilter {
     usernames: Vec<String>,
