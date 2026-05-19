@@ -12,7 +12,8 @@ use crate::{
     cli::FilterOptions,
     containers::slurm_data::{SlurmData, SlurmJob},
     utils::{
-        filtered_data_from_list::filtered_data_from_list, secs_to_nice_time::secs_to_nice_time,
+        filtered_data_from_list::filtered_data_from_list,
+        print_common_job_info::print_common_job_info, secs_to_nice_time::secs_to_nice_time,
     },
 };
 
@@ -45,7 +46,9 @@ pub fn command(
     }
     let filtered_data: Vec<SlurmJob> = filtered_data_from_list(structure, filter, values);
 
-    let selection_info: Vec<String> = filtered_data.iter().fold(Vec::new(), |mut vec, job| {
+    let mut selection_info: Vec<String> = vec![String::from("Finish")];
+
+    selection_info = filtered_data.iter().fold(selection_info, |mut vec, job| {
         vec.push(format!(
             "Name and ID: {}, {} | User Name: {} | Status: {}",
             job.name, job.job_id, job.user_name, job.job_state
@@ -53,7 +56,7 @@ pub fn command(
 
         vec
     });
-
+    // loop {
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Choose a job to view in more detail")
         .items(&selection_info)
@@ -61,55 +64,24 @@ pub fn command(
         .interact()
         .map_err(|_| ())?;
 
-    print_infomation_about_file(&filtered_data[selection]).map_err(|e| {
+    if selection == 0 {
+        return Ok(());
+    }
+
+    print_infomation_about_file(&filtered_data[selection - 1]).map_err(|e| {
         println!("Error: {e}");
         return ();
     })?;
-
+    // }
     Ok(())
 }
 
 fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     println!("==========================");
-    println!("Job Name & ID: {}, {}", target_job.name, target_job.job_id);
-    println!(
-        "User Name and ID: {}, {}",
-        target_job.user_name, target_job.user_id
-    );
-    println!("--------------------------");
-    println!(
-        "Submit Time: {}",
-        DateTime::from_timestamp(target_job.submit_time as i64, 0).expect("Could not determine")
-    );
-    println!(
-        "Latest Start Time: {}",
-        DateTime::from_timestamp(target_job.start_time as i64, 0).expect("Could not determine")
-    );
-    println!(
-        "Eligible Time: {}",
-        DateTime::from_timestamp(target_job.eligible_time as i64, 0).expect("Could not determine")
-    );
-    println!(
-        "End Time: {}",
-        DateTime::from_timestamp(target_job.end_time as i64, 0).expect("Could not determine")
-    );
-    println!(
-        "Last Sched Evaluation: {}",
-        DateTime::from_timestamp(target_job.last_sched_evaluation as i64, 0)
-            .expect("Could not determine")
-    );
-    println!("Job status: {}", target_job.job_state);
+    print_common_job_info(target_job)?;
 
-    if target_job.job_state == "RUNNING" {
-        println!(
-            "Running Time: {}",
-            secs_to_nice_time(
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH + Duration::from_secs(target_job.start_time as u64))
-                    .map_err(|_| String::from("Could not calculate running time"))?
-            )
-        );
-    }
+    println!("--------------------------");
+    // DIRECTORY FILES
     println!("--------------------------");
     println!(
         "Job max length: {} hours",
@@ -120,13 +92,30 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
         "Number of tasks per node: {}",
         target_job.tasks_per_node.number
     );
-    println!("Job directory: {}", target_job.current_working_directory);
-
     println!("--------------------------");
     // Output file if it exists
     let output_file = Path::new(&target_job.standard_output);
+    let error_file = Path::new(&target_job.standard_error);
 
-    if output_file
+    println!("Output File: {}", target_job.standard_output);
+    try_print_any_output_file(output_file, target_job)
+        .map_err(|e| format!("Error printing ouput file: {e}"))?;
+
+    if target_job.standard_error == target_job.standard_output {
+        return Ok(());
+    }
+
+    println!("--------------------------");
+
+    println!("Error File: {}", target_job.standard_error);
+    try_print_any_output_file(error_file, target_job)
+        .map_err(|e| format!("Error printing error file: {e}"))?;
+
+    Ok(())
+}
+
+fn try_print_any_output_file(file: &Path, target_job: &SlurmJob) -> Result<(), String> {
+    if file
         .try_exists()
         .map_err(|_| String::from("Couldn't determine if output file exists"))?
     {
@@ -151,6 +140,7 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
         println!("No file found");
     }
     println!("--------------------------");
+
     Ok(())
 }
 
