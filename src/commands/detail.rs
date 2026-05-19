@@ -2,6 +2,7 @@ use std::{
     fs::File,
     io::{self, BufRead},
     path::Path,
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 use chrono::DateTime;
@@ -9,6 +10,7 @@ use chrono::DateTime;
 use crate::{
     cli::FilterOptions,
     containers::slurm_data::{SlurmData, SlurmJob},
+    utils::secs_to_nice_time::secs_to_nice_time,
 };
 
 pub fn command(
@@ -56,7 +58,31 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
         "Latest Start Time: {}",
         DateTime::from_timestamp(target_job.start_time as i64, 0).expect("Could not determine")
     );
+    println!(
+        "Eligible Time: {}",
+        DateTime::from_timestamp(target_job.eligible_time as i64, 0).expect("Could not determine")
+    );
+    println!(
+        "End Time: {}",
+        DateTime::from_timestamp(target_job.end_time as i64, 0).expect("Could not determine")
+    );
+    println!(
+        "Last Sched Evaluation: {}",
+        DateTime::from_timestamp(target_job.last_sched_evaluation as i64, 0)
+            .expect("Could not determine")
+    );
     println!("Job status: {}", target_job.job_state);
+
+    if target_job.job_state == "RUNNING" {
+        println!(
+            "Running Time: {}",
+            secs_to_nice_time(
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH + Duration::from_secs(target_job.start_time as u64))
+                    .map_err(|_| String::from("Could not calculate running time"))?
+            )
+        );
+    }
     println!("--------------------------");
     println!(
         "Job max length: {} hours",
@@ -69,6 +95,7 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     );
     println!("Job directory: {}", target_job.current_working_directory);
 
+    println!("--------------------------");
     // Output file if it exists
     let output_file = Path::new(&target_job.standard_output);
 
@@ -93,7 +120,10 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
                 }
             }
         });
+    } else {
+        println!("No file found");
     }
+    println!("--------------------------");
     Ok(())
 }
 

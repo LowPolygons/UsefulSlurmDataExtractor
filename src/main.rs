@@ -9,6 +9,7 @@ mod cli;
 mod commands;
 mod containers;
 mod systems;
+mod utils;
 
 use crate::{
     cli::{Cli, Commands},
