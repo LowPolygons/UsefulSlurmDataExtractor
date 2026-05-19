@@ -1,5 +1,6 @@
 use std::env;
 
+use chrono::DateTime;
 use dialoguer::{Select, theme::ColorfulTheme};
 
 use crate::{
@@ -20,8 +21,12 @@ pub fn command(
 
     selection_info = filtered_data.iter().fold(selection_info, |mut vec, job| {
         vec.push(format!(
-            "Name and ID: {}, {} | User Name: {} | Status: {}",
-            job.name, job.job_id, job.user_name, job.job_state
+            "Name and ID: {}, {} | Directory: {} | Status: {} | Submit Time: {}",
+            job.name,
+            job.job_id,
+            job.current_working_directory,
+            job.job_state,
+            DateTime::from_timestamp(job.submit_time as i64, 0).expect("Could not determine")
         ));
 
         vec
@@ -59,7 +64,8 @@ pub fn command(
         }
     }
 
-    std::fs::write(
+    if job_ids_to_cancel.len() > 0 {
+        std::fs::write(
         "slurm_helper_cancel_script.sh",
         job_ids_to_cancel
             .iter()
@@ -77,16 +83,18 @@ pub fn command(
                 },
             )
             .join("\n"),
-    )
-    .map_err(|_| {
-        println!("Failed to write cancel script. Your list of jobs you wanted to cancel was: ");
+        )
+        .map_err(|_| {
+            println!("Failed to write cancel script. Your list of jobs you wanted to cancel was: ");
 
-        job_ids_to_cancel.iter().for_each(|j| println!("- {j}"));
+            job_ids_to_cancel.iter().for_each(|j| println!("- {j}"));
 
-        ()
-    })?;
+            ()
+        })?;
 
-    println!("Wrote the file 'slurm_helper_cancel_script.sh' to your current directory.");
-
+        println!("Wrote the file 'slurm_helper_cancel_script.sh' to your current directory.");
+    } else {
+        println!("No jobs chosen to cancel.");
+    }
     Ok(())
 }
