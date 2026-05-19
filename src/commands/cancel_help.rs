@@ -1,4 +1,4 @@
-use std::iter::Filter;
+use std::{env, iter::Filter};
 
 use dialoguer::{Select, theme::ColorfulTheme};
 
@@ -64,7 +64,13 @@ pub fn command(
         job_ids_to_cancel
             .iter()
             .fold(
-                vec![format!("rm slurm_helper_cancel_script.sh")],
+                vec![format!(
+                    "rm {}/slurm_helper_cancel_script.sh",
+                    env::current_dir().map_err(|_| {
+                        println!("Failure: Could not get the current directory for writing the cancel script");
+                        return ()
+                    })?.display()
+                )],
                 |mut vec, id| {
                     vec.push(format!("scancel {id}\n"));
                     vec
