@@ -8,6 +8,7 @@ use dialoguer::{Select, theme::ColorfulTheme};
 
 use crate::{
     cli::FilterOptions,
+    commands::line_vec_from_file,
     containers::slurm_data::{SlurmData, SlurmJob},
     utils::{
         filtered_data_from_list::filtered_data_from_list,
@@ -147,17 +148,4 @@ fn try_print_any_output_file(file: &Path, target_job: &SlurmJob) -> Result<(), S
     println!("--------------------------");
 
     Ok(())
-}
-
-fn line_vec_from_file(file_name: &str) -> Result<Vec<String>, String> {
-    let file: File = File::open(file_name).map_err(|e| e.to_string())?;
-
-    return Ok(io::BufReader::new(file).lines().into_iter().try_fold(
-        Vec::<String>::new(),
-        |mut vec, line| -> Result<Vec<String>, String> {
-            vec.push(String::from(line.map_err(|e| e.to_string())?));
-
-            return Ok(vec);
-        },
-    )?);
 }

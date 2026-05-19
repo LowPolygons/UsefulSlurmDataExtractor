@@ -13,7 +13,7 @@ mod utils;
 
 use crate::{
     cli::{Cli, Commands},
-    commands::{cancel_help, detail, list, list_directory, system_capacity},
+    commands::{cancel_help, detail, list, list_directory, system_capacity, tail_output},
     containers::slurm_data,
 };
 
@@ -73,10 +73,8 @@ fn main() -> ExitCode {
         Commands::TailOutput {
             filter,
             values,
-            editor,
-        } => {
-            unimplemented!()
-        }
+            num_lines,
+        } => tail_output::command(&structure, filter, values, num_lines),
         Commands::SystemCapacity => system_capacity::command(&structure),
         Commands::List { filter, values } => list::command(&structure, filter, values),
     };

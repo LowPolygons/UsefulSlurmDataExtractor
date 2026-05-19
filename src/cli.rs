@@ -54,8 +54,8 @@ pub enum Commands {
         #[arg(required = false, num_args = 1..)]
         values: Vec<String>,
 
-        #[arg(long)]
-        editor: bool,
+        #[arg(required = false, long)]
+        num_lines: Option<u8>,
     },
 
     #[command(
