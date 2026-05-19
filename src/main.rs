@@ -13,7 +13,7 @@ mod utils;
 
 use crate::{
     cli::{Cli, Commands},
-    commands::{detail, list, list_directory, system_capacity},
+    commands::{cancel_help, detail, list, list_directory, system_capacity},
     containers::slurm_data,
 };
 
@@ -66,9 +66,7 @@ fn main() -> ExitCode {
             directory,
             filter,
             values,
-        } => {
-            unimplemented!()
-        }
+        } => cancel_help::command(directory, &structure, filter, values),
         Commands::ListDirectory { filter, values } => {
             list_directory::command(&structure, filter, values)
         }
