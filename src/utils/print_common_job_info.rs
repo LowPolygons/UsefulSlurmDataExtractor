@@ -10,6 +10,7 @@ pub fn print_common_job_info(job_data: &SlurmJob) -> Result<(), String> {
         "User Name and ID: {}, {}",
         job_data.user_name, job_data.user_id
     );
+    println!("Job status: {}", job_data.job_state);
     println!("--------------------------");
     println!(
         "Submit Time: {}",
@@ -19,8 +20,11 @@ pub fn print_common_job_info(job_data: &SlurmJob) -> Result<(), String> {
         "Latest Start Time: {}",
         DateTime::from_timestamp(job_data.start_time as i64, 0).expect("Could not determine")
     );
-    println!("Job status: {}", job_data.job_state);
     if job_data.job_state == "RUNNING" {
+        println!(
+            "End Time: {}",
+            DateTime::from_timestamp(job_data.end_time as i64, 0).expect("Could not determine")
+        );
         println!(
             "Running Time: {}",
             secs_to_nice_time(
@@ -28,10 +32,6 @@ pub fn print_common_job_info(job_data: &SlurmJob) -> Result<(), String> {
                     .duration_since(UNIX_EPOCH + Duration::from_secs(job_data.start_time as u64))
                     .map_err(|_| String::from("Could not calculate running time"))?
             )
-        );
-        println!(
-            "End Time: {}",
-            DateTime::from_timestamp(job_data.end_time as i64, 0).expect("Could not determine")
         );
     }
     println!("Job directory: {}", job_data.current_working_directory);

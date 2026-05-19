@@ -81,7 +81,9 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     print_common_job_info(target_job)?;
 
     println!("--------------------------");
-    // DIRECTORY FILES
+    println!("Files in working directory:");
+    let working_directory = Path::new(&target_job.current_working_directory);
+    print_working_directory(working_directory)?;
     println!("--------------------------");
     println!(
         "Job max length: {} hours",
@@ -111,6 +113,34 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     try_print_any_output_file(error_file, target_job)
         .map_err(|e| format!("Error printing error file: {e}"))?;
 
+    Ok(())
+}
+
+fn print_working_directory(working_directory: &Path) -> Result<(), String> {
+    if working_directory
+        .try_exists()
+        .map_err(|_| String::from("Couldn't determine if working directory exists"))?
+        && working_directory.is_dir()
+    {
+        let mut elements_in_dir = working_directory
+            .read_dir()
+            .map_err(|_| String::from("Failed to get elements in directory"))?;
+
+        elements_in_dir.try_for_each(|elem| -> Result<(), String> {
+            let path = elem
+                .map_err(|_| String::from("Bad element in directory"))?
+                .path();
+
+            if path.is_dir() {
+                println!("..Dir.. {:?}", path);
+            } else {
+                println!("..File.. {:?}", path);
+            }
+            Ok(())
+        })?;
+    } else {
+        println!("Couldn't find working directory");
+    }
     Ok(())
 }
 
