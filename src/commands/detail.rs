@@ -40,7 +40,7 @@ pub fn command(
         }
         return Ok(());
     }
-    let filtered_data: Vec<SlurmJob> = filtered_data_from_list(structure, filter, values);
+    let mut filtered_data: Vec<SlurmJob> = filtered_data_from_list(structure, filter, values);
 
     loop {
         let default_options: Vec<String> = vec![String::from("Finish")];
@@ -62,7 +62,10 @@ pub fn command(
             .items(&options)
             .default(0)
             .interact()
-            .map_err(|_| ())?;
+            .map_err(|e| {
+                println!("Cancel selection menu failure: {e}");
+                return ();
+            })?;
 
         if inner_selection == 0 {
             continue;
@@ -80,6 +83,8 @@ pub fn command(
                     );
                     return ();
                 })?;
+
+            filtered_data.remove(selection - 1);
         }
     }
 }
