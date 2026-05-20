@@ -1,5 +1,3 @@
-
-
 use crate::{
     cli::FilterOptions,
     containers::slurm_data::SlurmData,
@@ -21,7 +19,7 @@ pub fn command(
         .try_for_each(|job_data| -> Result<(), ()> {
             println!("==========================");
             print_common_job_info(job_data).map_err(|e| {
-                println!("{e}");
+                println!("Error printing job info: {e}");
                 return ();
             })?;
             Ok(())

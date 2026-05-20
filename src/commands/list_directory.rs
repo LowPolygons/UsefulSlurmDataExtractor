@@ -1,6 +1,5 @@
 use std::path::Path;
 
-
 use crate::{
     cli::FilterOptions,
     commands::get_job_selection_through_menu,
@@ -20,8 +19,11 @@ pub fn command(
 
     let default_options: Vec<String> = vec![String::from("Finish")];
 
-    let selection: usize =
-        get_job_selection_through_menu(&filtered_data, default_options).map_err(|_| ())?;
+    let selection: usize = get_job_selection_through_menu(&filtered_data, default_options)
+        .map_err(|e| {
+            println!("Get job menu failure: {e}");
+            return ();
+        })?;
 
     if selection == 0 {
         return Ok(());
@@ -30,7 +32,7 @@ pub fn command(
     let working_directory = Path::new(&filtered_data[selection - 1].current_working_directory);
 
     print_working_directory(working_directory, false).map_err(|e| {
-        println!("{e}");
+        println!("Print working directory failure: {e}");
         return ();
     })?;
 

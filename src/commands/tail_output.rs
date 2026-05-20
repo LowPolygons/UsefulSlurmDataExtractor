@@ -23,12 +23,15 @@ pub fn command(
 
     let output_file = Path::new(&filtered_data[selection].standard_output);
 
-    if output_file.try_exists().map_err(|_| {
-        println!("Couldn't validate if the output file exists");
+    if output_file.try_exists().map_err(|e| {
+        println!(
+            "Couldn't validate if the output file exists: {}",
+            e.to_string()
+        );
         return ();
     })? {
         let lines = line_vec_from_file(&filtered_data[selection].standard_output).map_err(|e| {
-            println!("{e}");
+            println!("Line vec from file error: {e}");
             return ();
         })?;
 

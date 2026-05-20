@@ -126,8 +126,11 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
 }
 
 fn try_print_any_output_file(file: &Path, target_job: &SlurmJob) -> Result<(), String> {
-    if file.try_exists().map_err(|_| {
-        String::from("Couldn't determine if output file exists. You may not have access rights")
+    if file.try_exists().map_err(|e| {
+        String::from(format!(
+            "Couldn't determine if output file exists. You may not have access rights: {}",
+            e.to_string()
+        ))
     })? {
         let lines = line_vec_from_file(&target_job.standard_output).map_err(|e| {
             return e;

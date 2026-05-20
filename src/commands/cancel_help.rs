@@ -26,7 +26,7 @@ pub fn command(
             job.job_id,
             job.current_working_directory,
             job.job_state,
-            DateTime::from_timestamp(job.submit_time as i64, 0).expect("Could not determine")
+            DateTime::from_timestamp(job.submit_time as i64, 0).unwrap_or(DateTime::default())
         ));
 
         vec
@@ -51,7 +51,10 @@ pub fn command(
             .items(&selection_info)
             .default(0)
             .interact()
-            .map_err(|_| ())?;
+            .map_err(|e| {
+                println!("Error in selection: {e}");
+                return ();
+            })?;
 
         if selection == 0 {
             break;
