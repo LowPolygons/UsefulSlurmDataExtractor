@@ -1,6 +1,7 @@
 use std::{
     io::{self, IsTerminal, Read},
-    process::ExitCode,
+    os::unix::process::CommandExt,
+    process::{Command, ExitCode},
 };
 
 use serde::de::DeserializeOwned;
@@ -14,7 +15,7 @@ mod utils;
 use crate::{
     cli::{Cli, Commands},
     commands::{cancel_help, detail, list, list_directory, system_capacity, tail_output},
-    containers::slurm_data,
+    containers::slurm_data::{self, SlurmData},
 };
 
 use clap::Parser;
@@ -31,25 +32,33 @@ pub fn json_string_to_struct<T: DeserializeOwned>(stringy_json: String) -> Resul
 fn main() -> ExitCode {
     // Extracts the information from the piped input
     let mut input = String::new();
+    let structure: SlurmData;
 
     if io::stdin().is_terminal() {
-        println!(
-            "User did not provide any input - did you run it like 'squeue --json | UsefulSlurmDataExtractor' ?"
-        );
-        return ExitCode::FAILURE;
-    }
+        println!("User did not provide any input - Attempting to extract data manually");
 
-    let _ = io::stdin().read_to_string(&mut input).map_err(|_| {
-        println!("Failed to read user input - did you run it like 'squeue --json | UsefulSlurmDataExtractor' ?");
-        return ExitCode::FAILURE;
-    });
+        let squeue_output = Command::new("squeue").arg("--json").arg("--me").output();
 
-    let structure: slurm_data::SlurmData = match json_string_to_struct(input) {
+        match squeue_output {
+            Ok(v) => {
+                input = String::from_utf8_lossy(&v.stdout).to_string();
+            }
+            Err(_) => {
+                println!("Failed to run squeue command internally, consider piping it in");
+                return ExitCode::FAILURE;
+            }
+        }
+    } else {
+        let _ = io::stdin().read_to_string(&mut input).map_err(|_| {
+            println!("Failed to read user input - did you run it like 'squeue --json | UsefulSlurmDataExtractor' ?");
+            return ExitCode::FAILURE;
+        });
+    };
+
+    structure = match json_string_to_struct(input) {
         Ok(val) => val,
         Err(_) => {
-            println!(
-                "Failed to format input properly - did you run it like 'squeue --json | UsefulSlurmDataExtractor' ?"
-            );
+            println!("Failed to format input properly - consider piping the data in");
             return ExitCode::FAILURE;
         }
     };
