@@ -6,7 +6,7 @@ pub fn print_working_directory(
 ) -> Result<(), String> {
     if working_directory
         .try_exists()
-        .map_err(|_| String::from("Couldn't determine if working directory exists"))?
+        .map_err(|e| format!("Couldn't determine if working directory exists: {e}"))?
         && working_directory.is_dir()
     {
         let mut elements_in_dir = working_directory

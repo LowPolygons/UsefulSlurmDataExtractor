@@ -71,10 +71,13 @@ pub fn command(
                 "Cancelling Job with ID {}..",
                 filtered_data[selection - 1].job_id
             );
-            Command::new(format!("scancel {}", filtered_data[selection - 1].job_id))
+            let _ = Command::new("scancel")
+                .arg(filtered_data[selection - 1].job_id.to_string())
                 .output()
                 .map_err(|_| {
-                    println!("Failed to execute the cancel command");
+                    println!(
+                        "Failed to execute the cancel command: Does this machine have 'scancel'?"
+                    );
                     return ();
                 })?;
         }
@@ -104,23 +107,25 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     );
 
     println!("--------------------------");
+
     // Output file if it exists
-    let output_file = Path::new(&target_job.standard_output);
-    let error_file = Path::new(&target_job.standard_error);
+    if target_job.job_state != "PENDING" {
+        let output_file = Path::new(&target_job.standard_output);
+        let error_file = Path::new(&target_job.standard_error);
 
-    println!("Output File: {}", target_job.standard_output);
-    try_print_any_output_file(output_file, target_job)
-        .map_err(|e| format!("Error printing ouput file: {e}"))?;
+        println!("Output File: {}", target_job.standard_output);
+        try_print_any_output_file(output_file, target_job)
+            .map_err(|e| format!("Error printing ouput file: {e}"))?;
 
-    if target_job.standard_error == target_job.standard_output {
-        return Ok(());
+        if target_job.standard_error == target_job.standard_output {
+            return Ok(());
+        }
+
+        println!("--------------------------");
+        println!("Error File: {}", target_job.standard_error);
+        try_print_any_output_file(error_file, target_job)
+            .map_err(|e| format!("Error printing error file: {e}"))?;
     }
-
-    println!("--------------------------");
-
-    println!("Error File: {}", target_job.standard_error);
-    try_print_any_output_file(error_file, target_job)
-        .map_err(|e| format!("Error printing error file: {e}"))?;
 
     Ok(())
 }
