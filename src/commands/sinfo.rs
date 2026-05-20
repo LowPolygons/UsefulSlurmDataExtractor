@@ -16,7 +16,7 @@ pub fn command() -> Result<(), ()> {
         }
     }
 
-    let structure: SinfoData = json_string_to_struct(input).map_err(|_| {
+    let structure: SinfoData = json_string_to_struct(input).map_err(|e| {
         println!("Failed to create sinfo structure from input");
         return ();
     })?;

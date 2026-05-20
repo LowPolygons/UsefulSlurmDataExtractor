@@ -29,9 +29,16 @@ pub struct SinfoValue {
     pub cluster: String,
     pub comment: String,
     pub extra: String,
-    pub reason: HashMap<String, String>,
+    pub reason: SinfoReason,
     pub reservation: String,
     pub partition: Partition,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SinfoReason {
+    pub description: String,
+    pub time: i64,
+    pub user: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
