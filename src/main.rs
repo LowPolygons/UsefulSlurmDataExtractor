@@ -14,7 +14,7 @@ mod utils;
 
 use crate::{
     cli::{Cli, Commands},
-    commands::{cancel_help, detail, list, list_directory, system_capacity, tail_output},
+    commands::{cancel_help, detail, list, list_directory, sinfo, system_capacity, tail_output},
     containers::slurm_data::{self, SlurmData},
 };
 
@@ -92,6 +92,7 @@ fn main() -> ExitCode {
         } => tail_output::command(&structure, filter, values, num_lines),
         Commands::SystemCapacity => system_capacity::command(&structure),
         Commands::List { filter, values } => list::command(&structure, filter, values),
+        Commands::Sinfo => sinfo::command(),
     };
 
     match success {

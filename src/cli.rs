@@ -71,6 +71,9 @@ pub enum Commands {
         #[arg(required = false, num_args = 1..)]
         values: Vec<String>,
     },
+
+    #[command(about = "Use to nicely format some info from the sinfo command")]
+    Sinfo,
 }
 
 #[derive(Parser)]
@@ -80,6 +83,10 @@ pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
 
-    #[arg(long, required = false)]
+    #[arg(
+        long,
+        required = false,
+        help = "If the 'squeue' command is to run automatically, this flag removes the '--me' flag from the command"
+    )]
     pub all: bool,
 }

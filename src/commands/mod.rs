@@ -11,6 +11,7 @@ pub mod cancel_help;
 pub mod detail;
 pub mod list;
 pub mod list_directory;
+pub mod sinfo;
 pub mod system_capacity;
 pub mod tail_output;
 

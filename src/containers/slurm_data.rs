@@ -1,3 +1,4 @@
+use crate::containers::{SlurmMeta, SlurmSetInfiniteNumberContainer};
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -8,20 +9,6 @@ pub struct SlurmData {
     pub jobs: Vec<SlurmJob>,
     pub warnings: Vec<HashMap<String, String>>,
     pub errors: Vec<HashMap<String, String>>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SlurmMeta {
-    pub command: Vec<String>,
-    pub plugins: HashMap<String, String>,
-    #[serde(rename = "Slurm")]
-    pub slurm: SlurmMetaSlurm,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SlurmMetaSlurm {
-    pub version: HashMap<String, i64>,
-    pub release: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -157,13 +144,6 @@ pub struct SlurmJob {
     pub maximum_switch_wait_time: i64,
     pub wckey: String,
     pub current_working_directory: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SlurmSetInfiniteNumberContainer {
-    pub set: bool,
-    pub infinite: bool,
-    pub number: f32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
