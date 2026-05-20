@@ -79,4 +79,7 @@ pub enum Commands {
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
+
+    #[arg(long, required = false)]
+    pub all: bool,
 }

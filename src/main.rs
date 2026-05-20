@@ -30,14 +30,22 @@ pub fn json_string_to_struct<T: DeserializeOwned>(stringy_json: String) -> Resul
 }
 
 fn main() -> ExitCode {
-    // Extracts the information from the piped input
+    let cli = Cli::parse();
+
+    // Try extract piped input or run command manually
     let mut input = String::new();
     let structure: SlurmData;
 
     if io::stdin().is_terminal() {
         println!("User did not provide any input - Attempting to extract data manually");
 
-        let squeue_output = Command::new("squeue").arg("--json").arg("--me").output();
+        let squeue_output = if cli.all {
+            // println!("Extracting data for all jobs");
+            Command::new("squeue").arg("--json").output()
+        } else {
+            // println!("Extracting data for --me");
+            Command::new("squeue").arg("--json").arg("--me").output()
+        };
 
         match squeue_output {
             Ok(v) => {
@@ -62,8 +70,6 @@ fn main() -> ExitCode {
             return ExitCode::FAILURE;
         }
     };
-
-    let cli = Cli::parse();
 
     let success: Result<(), ()> = match &cli.command {
         Commands::Detail {
