@@ -22,5 +22,16 @@ pub fn command() -> Result<(), ()> {
     })?;
 
     println!("Number of nodes: {}", structure.sinfo.len());
+
+    structure.sinfo.iter().for_each(|sinfo| {
+        println!(
+            "- {} has {} cpus. {} are idle, {} are allocated and {} are other",
+            sinfo.partition.name,
+            sinfo.cpus.total,
+            sinfo.cpus.idle,
+            sinfo.cpus.allocated,
+            sinfo.cpus.other
+        );
+    });
     Ok(())
 }
