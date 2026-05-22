@@ -27,9 +27,6 @@ pub enum Commands {
 
     #[command(about = "Used to aid in swiftly cancelling unwanted jobs")]
     CancelHelp {
-        #[arg(long, default_value_t = String::from(""))]
-        directory: String,
-
         #[arg(long, value_enum)]
         filter: Option<FilterOptions>,
 

@@ -11,7 +11,6 @@ use crate::{
 };
 
 pub struct CancelHelp {
-    pub directory: String,
     pub filter: Option<FilterOptions>,
     pub values: Vec<String>,
 }
@@ -23,72 +22,52 @@ impl CommandCall for CancelHelp {
 
         let mut job_ids_to_cancel: Vec<u64> = vec![];
 
-        if !self.directory.is_empty() {
-            let dir = Path::new(&self.directory);
+        let mut selection_info: Vec<String> =
+            vec![String::from("Finish"), String::from("Clear list")];
 
-            if dir.try_exists().map_err(|_| {
-                println!("Couldn't establish if the directory exists - you may not have permission to view it.");
+        selection_info = filtered_data.iter().fold(selection_info, |mut vec, job| {
+            vec.push(format!(
+                "Name and ID: {}, {} | Directory: {} | Status: {} | Submit Time: {}",
+                job.name,
+                job.job_id,
+                job.current_working_directory,
+                job.job_state,
+                DateTime::from_timestamp(job.submit_time as i64, 0).unwrap_or(DateTime::default())
+            ));
 
-                return ()
-            })? || dir.is_dir() {
-                filtered_data.iter().for_each(|job| {
-                    if job.current_working_directory == self.directory {
-                        job_ids_to_cancel.push(job.job_id);
-                    }
+            vec
+        });
+
+        loop {
+            let list = job_ids_to_cancel
+                .iter()
+                .fold(String::from(""), |mut string, j| {
+                    string = format!("{} {}", string, j);
+
+                    string
                 });
+
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt(format!(
+                    "Choose a job to cancel - Current IDs are: {}",
+                    list
+                ))
+                .items(&selection_info)
+                .default(0)
+                .interact()
+                .map_err(|e| {
+                    println!("Error in selection: {e}");
+                    return ();
+                })?;
+
+            if selection == 0 {
+                break;
+            } else if selection == 1 {
+                job_ids_to_cancel = Vec::new();
             } else {
-                println!("The provided directory does not exist");
-            }
-            return Ok(());
-        } else {
-            let mut selection_info: Vec<String> =
-                vec![String::from("Finish"), String::from("Clear list")];
+                job_ids_to_cancel.push(filtered_data[selection - 2].job_id);
 
-            selection_info = filtered_data.iter().fold(selection_info, |mut vec, job| {
-                vec.push(format!(
-                    "Name and ID: {}, {} | Directory: {} | Status: {} | Submit Time: {}",
-                    job.name,
-                    job.job_id,
-                    job.current_working_directory,
-                    job.job_state,
-                    DateTime::from_timestamp(job.submit_time as i64, 0)
-                        .unwrap_or(DateTime::default())
-                ));
-
-                vec
-            });
-
-            loop {
-                let list = job_ids_to_cancel
-                    .iter()
-                    .fold(String::from(""), |mut string, j| {
-                        string = format!("{} {}", string, j);
-
-                        string
-                    });
-
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .with_prompt(format!(
-                        "Choose a job to cancel - Current IDs are: {}",
-                        list
-                    ))
-                    .items(&selection_info)
-                    .default(0)
-                    .interact()
-                    .map_err(|e| {
-                        println!("Error in selection: {e}");
-                        return ();
-                    })?;
-
-                if selection == 0 {
-                    break;
-                } else if selection == 1 {
-                    job_ids_to_cancel = Vec::new();
-                } else {
-                    job_ids_to_cancel.push(filtered_data[selection - 2].job_id);
-
-                    println!("Job with ID {} added", filtered_data[selection - 2].job_id);
-                }
+                println!("Job with ID {} added", filtered_data[selection - 2].job_id);
             }
         }
 

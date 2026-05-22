@@ -35,15 +35,7 @@ fn main() -> ExitCode {
             job_id,
             values,
         }),
-        Commands::CancelHelp {
-            directory,
-            filter,
-            values,
-        } => Box::new(CancelHelp {
-            directory,
-            filter,
-            values,
-        }),
+        Commands::CancelHelp { filter, values } => Box::new(CancelHelp { filter, values }),
         Commands::ListDirectory { filter, values } => Box::new(ListDirectory { filter, values }),
         Commands::TailOutput {
             filter,
