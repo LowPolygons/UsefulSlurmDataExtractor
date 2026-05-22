@@ -1,10 +1,10 @@
 use std::{path::Path, process::Command};
 
-use dialoguer::{Select, theme::ColorfulTheme};
+use dialoguer::{theme::ColorfulTheme, Select};
 
 use crate::{
     cli::FilterOptions,
-    commands::{get_job_selection_through_menu, line_vec_from_file},
+    commands::{command::CommandCall, get_job_selection_through_menu, line_vec_from_file},
     containers::slurm_data::{SlurmData, SlurmJob},
     utils::{
         filtered_data_from_list::filtered_data_from_list,
@@ -13,82 +13,85 @@ use crate::{
     },
 };
 
-pub fn command(
-    structure: &SlurmData,
-    job_id: &Option<u64>,
-    filter: &Option<FilterOptions>,
-    values: &Vec<String>,
-) -> Result<(), ()> {
-    if let Some(id) = job_id {
-        let job_ids = structure
-            .jobs
-            .iter()
-            .fold(Vec::<u64>::new(), |mut vec, job| {
-                vec.push(job.job_id);
-                return vec;
-            });
-        if job_ids.contains(id) {
-            let target_job: &SlurmJob = &structure.jobs[job_ids
+pub struct Detail {
+    pub job_id: Option<u64>,
+    pub filter: Option<FilterOptions>,
+    pub values: Vec<String>,
+}
+
+impl CommandCall for Detail {
+    fn command(&self, structure: &SlurmData) -> Result<(), ()> {
+        if let Some(id) = self.job_id {
+            let job_ids = structure
+                .jobs
                 .iter()
-                .position(|&item| item.eq(id))
-                .unwrap_or(job_ids.len() + 1)];
+                .fold(Vec::<u64>::new(), |mut vec, job| {
+                    vec.push(job.job_id);
+                    return vec;
+                });
+            if job_ids.contains(&id) {
+                let target_job: &SlurmJob = &structure.jobs[job_ids
+                    .iter()
+                    .position(|&item| item.eq(&id))
+                    .unwrap_or(job_ids.len() + 1)];
 
-            print_infomation_about_file(target_job).map_err(|e| {
-                println!("Error: {}", e);
-                return ();
-            })?;
-        }
-        return Ok(());
-    }
-    let mut filtered_data: Vec<SlurmJob> = filtered_data_from_list(structure, filter, values);
-
-    loop {
-        let default_options: Vec<String> = vec![String::from("Finish")];
-        let selection: usize =
-            get_job_selection_through_menu(&filtered_data, default_options).map_err(|_| ())?;
-
-        if selection == 0 {
+                print_infomation_about_file(target_job).map_err(|e| {
+                    println!("Error: {}", e);
+                    return ();
+                })?;
+            }
             return Ok(());
         }
+        let mut filtered_data: Vec<SlurmJob> =
+            filtered_data_from_list(structure, &self.filter, &self.values);
 
-        print_infomation_about_file(&filtered_data[selection - 1]).map_err(|e| {
-            println!("Error: {e}");
-            return ();
-        })?;
+        loop {
+            let default_options: Vec<String> = vec![String::from("Finish")];
+            let selection: usize =
+                get_job_selection_through_menu(&filtered_data, default_options).map_err(|_| ())?;
 
-        let options = vec!["Back", "Cancel Job"];
-        let inner_selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Do you wish to cancel the job?")
-            .items(&options)
-            .default(0)
-            .interact()
-            .map_err(|e| {
-                println!("Cancel selection menu failure: {e}");
+            if selection == 0 {
+                return Ok(());
+            }
+
+            print_infomation_about_file(&filtered_data[selection - 1]).map_err(|e| {
+                println!("Error: {e}");
                 return ();
             })?;
 
-        if inner_selection == 0 {
-            continue;
-        } else {
-            println!(
-                "Cancelling Job with ID {}..",
-                filtered_data[selection - 1].job_id
-            );
-            let _ = Command::new("scancel")
-                .arg(filtered_data[selection - 1].job_id.to_string())
-                .output()
-                .map_err(|_| {
-                    println!(
-                        "Failed to execute the cancel command: Does this machine have 'scancel'?"
-                    );
+            let options = vec!["Back", "Cancel Job"];
+            let inner_selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("Do you wish to cancel the job?")
+                .items(&options)
+                .default(0)
+                .interact()
+                .map_err(|e| {
+                    println!("Cancel selection menu failure: {e}");
                     return ();
                 })?;
 
-            filtered_data.remove(selection - 1);
+            if inner_selection == 0 {
+                continue;
+            } else {
+                println!(
+                    "Cancelling Job with ID {}..",
+                    filtered_data[selection - 1].job_id
+                );
+                let _ = Command::new("scancel")
+                    .arg(filtered_data[selection - 1].job_id.to_string())
+                    .output()
+                    .map_err(|_| {
+                        println!(
+                        "Failed to execute the cancel command: Does this machine have 'scancel'?"
+                    );
+                        return ();
+                    })?;
+
+                filtered_data.remove(selection - 1);
+            }
         }
     }
 }
-
 fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     println!("==========================");
     print_common_job_info(target_job)?;

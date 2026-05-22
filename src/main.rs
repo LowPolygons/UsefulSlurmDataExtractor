@@ -1,10 +1,7 @@
 use std::{
     io::{self, IsTerminal, Read},
-    os::unix::process::CommandExt,
     process::{Command, ExitCode},
 };
-
-use serde::de::DeserializeOwned;
 
 mod cli;
 mod commands;
@@ -14,36 +11,85 @@ mod utils;
 
 use crate::{
     cli::{Cli, Commands},
-    commands::{cancel_help, detail, list, list_directory, sinfo, system_capacity, tail_output},
-    containers::slurm_data::{self, SlurmData},
+    commands::{
+        cancel_help::CancelHelp, command::CommandCall, detail::Detail, list::List,
+        list_directory::ListDirectory, sinfo::Sinfo, system_capacity::SystemCapacity,
+        tail_output::TailOutput,
+    },
+    containers::slurm_data::SlurmData,
+    utils::json_string_to_struct::json_string_to_struct,
 };
 
 use clap::Parser;
 
-pub fn json_string_to_struct<T: DeserializeOwned>(stringy_json: String) -> Result<T, ()> {
-    let structy_value = serde_json::from_str(&stringy_json).map_err(|_e| {
-        println!("{}", _e.to_string());
-        return ();
-    })?;
-
-    Ok(structy_value)
-}
-
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    let mut requires_all_in_queue: bool = false;
+    let command: Box<dyn CommandCall> = match cli.command {
+        Commands::Detail {
+            job_id,
+            filter,
+            values,
+        } => Box::new(Detail {
+            filter,
+            job_id,
+            values,
+        }),
+        Commands::CancelHelp {
+            directory,
+            filter,
+            values,
+        } => Box::new(CancelHelp {
+            directory,
+            filter,
+            values,
+        }),
+        Commands::ListDirectory { filter, values } => Box::new(ListDirectory { filter, values }),
+        Commands::TailOutput {
+            filter,
+            values,
+            num_lines,
+        } => Box::new(TailOutput {
+            filter,
+            values,
+            num_lines,
+        }),
+        Commands::SystemCapacity => {
+            requires_all_in_queue = true;
 
-    // Try extract piped input or run command manually
+            println!("Attempting to extract all data from slurm");
+
+            Box::new(SystemCapacity {})
+        }
+        Commands::List { filter, values } => Box::new(List { filter, values }),
+        Commands::Sinfo => Box::new(Sinfo {}),
+    };
+
+    let structure: SlurmData = match get_structure(cli.all, requires_all_in_queue) {
+        Ok(val) => val,
+        Err(_) => {
+            println!("Failed to create data structure");
+
+            return ExitCode::FAILURE;
+        }
+    };
+
+    match command.command(&structure) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(()) => {
+            println!("Unsuccessful program execution");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn get_structure(cli_all: bool, requires_all_in_queue: bool) -> Result<SlurmData, ()> {
     let mut input = String::new();
-    let structure: SlurmData;
-
-    if io::stdin().is_terminal() {
-        println!("User did not provide any input - Attempting to extract data manually");
-
-        let squeue_output = if cli.all {
-            // println!("Extracting data for all jobs");
+    // The SystemCapacity command is useless if the user tries to use
+    if io::stdin().is_terminal() || requires_all_in_queue {
+        let squeue_output = if cli_all || requires_all_in_queue {
             Command::new("squeue").arg("--json").output()
         } else {
-            // println!("Extracting data for --me");
             Command::new("squeue").arg("--json").arg("--me").output()
         };
 
@@ -53,7 +99,7 @@ fn main() -> ExitCode {
             }
             Err(_) => {
                 println!("Failed to run squeue command internally, consider piping it in");
-                return ExitCode::FAILURE;
+                return Err(());
             }
         }
     } else {
@@ -63,46 +109,13 @@ fn main() -> ExitCode {
         });
     };
 
-    structure = match json_string_to_struct(input) {
+    let structure = match json_string_to_struct(input) {
         Ok(val) => val,
         Err(_) => {
             println!("Failed to format input properly - consider piping the data in");
-            return ExitCode::FAILURE;
+            return Err(());
         }
     };
 
-    let success: Result<(), ()> = match &cli.command {
-        Commands::Detail {
-            job_id,
-            filter,
-            values,
-        } => detail::command(&structure, job_id, filter, values),
-        Commands::CancelHelp {
-            directory,
-            filter,
-            values,
-        } => cancel_help::command(directory, &structure, filter, values),
-        Commands::ListDirectory { filter, values } => {
-            list_directory::command(&structure, filter, values)
-        }
-        Commands::TailOutput {
-            filter,
-            values,
-            num_lines,
-        } => tail_output::command(&structure, filter, values, num_lines),
-        Commands::SystemCapacity => system_capacity::command(&structure),
-        Commands::List { filter, values } => list::command(&structure, filter, values),
-        Commands::Sinfo => sinfo::command(),
-    };
-
-    match success {
-        Ok(_) => {}
-        Err(_) => {
-            println!("Unsuccessful program execution");
-
-            return ExitCode::FAILURE;
-        }
-    }
-
-    ExitCode::SUCCESS
+    Ok(structure)
 }

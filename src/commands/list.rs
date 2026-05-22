@@ -1,5 +1,6 @@
 use crate::{
     cli::FilterOptions,
+    commands::command::CommandCall,
     containers::slurm_data::SlurmData,
     utils::{
         filtered_data_from_list::filtered_data_from_list,
@@ -7,28 +8,31 @@ use crate::{
     },
 };
 
-pub fn command(
-    slurm_data: &SlurmData,
-    filter: &Option<FilterOptions>,
-    values: &Vec<String>,
-) -> Result<(), ()> {
-    let filtered_data = filtered_data_from_list(slurm_data, filter, values);
+pub struct List {
+    pub filter: Option<FilterOptions>,
+    pub values: Vec<String>,
+}
 
-    filtered_data
-        .iter()
-        .try_for_each(|job_data| -> Result<(), ()> {
-            println!("==========================");
-            print_common_job_info(job_data).map_err(|e| {
-                println!("Error printing job info: {e}");
-                return ();
-            })?;
-            Ok(())
-        })
-        .map_err(|_| ())?;
+impl CommandCall for List {
+    fn command(&self, slurm_data: &SlurmData) -> Result<(), ()> {
+        let filtered_data = filtered_data_from_list(slurm_data, &self.filter, &self.values);
 
-    println!("==========================");
-    println!("Listed info for {} jobs", filtered_data.len());
-    println!("==========================");
+        filtered_data
+            .iter()
+            .try_for_each(|job_data| -> Result<(), ()> {
+                println!("==========================");
+                print_common_job_info(job_data).map_err(|e| {
+                    println!("Error printing job info: {e}");
+                    return ();
+                })?;
+                Ok(())
+            })
+            .map_err(|_| ())?;
 
-    Ok(())
+        println!("==========================");
+        println!("Listed info for {} jobs", filtered_data.len());
+        println!("==========================");
+
+        Ok(())
+    }
 }

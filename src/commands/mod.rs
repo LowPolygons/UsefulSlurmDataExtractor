@@ -8,6 +8,7 @@ use dialoguer::{Select, theme::ColorfulTheme};
 use crate::containers::slurm_data::SlurmJob;
 
 pub mod cancel_help;
+pub mod command;
 pub mod detail;
 pub mod list;
 pub mod list_directory;

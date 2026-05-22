@@ -1,74 +1,99 @@
-use std::env;
+use std::{env, path::Path};
 
 use chrono::DateTime;
 use dialoguer::{Select, theme::ColorfulTheme};
 
 use crate::{
     cli::FilterOptions,
+    commands::command::CommandCall,
     containers::slurm_data::{SlurmData, SlurmJob},
     utils::filtered_data_from_list::filtered_data_from_list,
 };
 
-pub fn command(
-    directory: &String,
-    structure: &SlurmData,
-    filter: &Option<FilterOptions>,
-    values: &Vec<String>,
-) -> Result<(), ()> {
-    let filtered_data: Vec<SlurmJob> = filtered_data_from_list(structure, filter, values);
+pub struct CancelHelp {
+    pub directory: String,
+    pub filter: Option<FilterOptions>,
+    pub values: Vec<String>,
+}
 
-    let mut selection_info: Vec<String> = vec![String::from("Finish"), String::from("Clear list")];
+impl CommandCall for CancelHelp {
+    fn command(&self, structure: &SlurmData) -> Result<(), ()> {
+        let filtered_data: Vec<SlurmJob> =
+            filtered_data_from_list(structure, &self.filter, &self.values);
 
-    selection_info = filtered_data.iter().fold(selection_info, |mut vec, job| {
-        vec.push(format!(
-            "Name and ID: {}, {} | Directory: {} | Status: {} | Submit Time: {}",
-            job.name,
-            job.job_id,
-            job.current_working_directory,
-            job.job_state,
-            DateTime::from_timestamp(job.submit_time as i64, 0).unwrap_or(DateTime::default())
-        ));
+        let mut job_ids_to_cancel: Vec<u64> = vec![];
 
-        vec
-    });
+        if !self.directory.is_empty() {
+            let dir = Path::new(&self.directory);
 
-    let mut job_ids_to_cancel: Vec<u64> = vec![];
+            if dir.try_exists().map_err(|_| {
+                println!("Couldn't establish if the directory exists - you may not have permission to view it.");
 
-    loop {
-        let list = job_ids_to_cancel
-            .iter()
-            .fold(String::from(""), |mut string, j| {
-                string = format!("{} {}", string, j);
+                return ()
+            })? || dir.is_dir() {
+                filtered_data.iter().for_each(|job| {
+                    if job.current_working_directory == self.directory {
+                        job_ids_to_cancel.push(job.job_id);
+                    }
+                });
+            } else {
+                println!("The provided directory does not exist");
+            }
+            return Ok(());
+        } else {
+            let mut selection_info: Vec<String> =
+                vec![String::from("Finish"), String::from("Clear list")];
 
-                string
+            selection_info = filtered_data.iter().fold(selection_info, |mut vec, job| {
+                vec.push(format!(
+                    "Name and ID: {}, {} | Directory: {} | Status: {} | Submit Time: {}",
+                    job.name,
+                    job.job_id,
+                    job.current_working_directory,
+                    job.job_state,
+                    DateTime::from_timestamp(job.submit_time as i64, 0)
+                        .unwrap_or(DateTime::default())
+                ));
+
+                vec
             });
 
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt(format!(
-                "Choose a job to cancel - Current IDs are: {}",
-                list
-            ))
-            .items(&selection_info)
-            .default(0)
-            .interact()
-            .map_err(|e| {
-                println!("Error in selection: {e}");
-                return ();
-            })?;
+            loop {
+                let list = job_ids_to_cancel
+                    .iter()
+                    .fold(String::from(""), |mut string, j| {
+                        string = format!("{} {}", string, j);
 
-        if selection == 0 {
-            break;
-        } else if selection == 1 {
-            job_ids_to_cancel = Vec::new();
-        } else {
-            job_ids_to_cancel.push(filtered_data[selection - 2].job_id);
+                        string
+                    });
 
-            println!("Job with ID {} added", filtered_data[selection - 2].job_id);
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                    .with_prompt(format!(
+                        "Choose a job to cancel - Current IDs are: {}",
+                        list
+                    ))
+                    .items(&selection_info)
+                    .default(0)
+                    .interact()
+                    .map_err(|e| {
+                        println!("Error in selection: {e}");
+                        return ();
+                    })?;
+
+                if selection == 0 {
+                    break;
+                } else if selection == 1 {
+                    job_ids_to_cancel = Vec::new();
+                } else {
+                    job_ids_to_cancel.push(filtered_data[selection - 2].job_id);
+
+                    println!("Job with ID {} added", filtered_data[selection - 2].job_id);
+                }
+            }
         }
-    }
 
-    if job_ids_to_cancel.len() > 0 {
-        std::fs::write(
+        if job_ids_to_cancel.len() > 0 {
+            std::fs::write(
         "slurm_helper_cancel_script.sh",
         job_ids_to_cancel
             .iter()
@@ -95,9 +120,10 @@ pub fn command(
             ()
         })?;
 
-        println!("Wrote the file 'slurm_helper_cancel_script.sh' to your current directory.");
-    } else {
-        println!("No jobs chosen to cancel.");
+            println!("Wrote the file 'slurm_helper_cancel_script.sh' to your current directory.");
+        } else {
+            println!("No jobs chosen to cancel.");
+        }
+        Ok(())
     }
-    Ok(())
 }
