@@ -19,17 +19,16 @@ pub fn print_working_directory(
                 if index == 20 {
                     println!(".. Some files Hidden ..");
                 }
-                return Ok(());
-            }
-
-            let path = elem
-                .map_err(|_| String::from("Bad element in directory"))?
-                .path();
-
-            if path.is_dir() {
-                println!("..Dir.. {:?}", path);
             } else {
-                println!("..File.. {:?}", path);
+                let path = elem
+                    .map_err(|_| String::from("Bad element in directory"))?
+                    .path();
+
+                if path.is_dir() {
+                    println!("..Dir.. {:?}", path);
+                } else {
+                    println!("..File.. {:?}", path);
+                }
             }
 
             index = index + 1;
