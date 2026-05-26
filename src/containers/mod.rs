@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
+pub mod sacct_data;
 pub mod sinfo_data;
 pub mod slurm_data;
 pub mod useful_slurm_job_info;

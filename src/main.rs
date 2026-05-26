@@ -13,7 +13,7 @@ use crate::{
     cli::{Cli, Commands},
     commands::{
         cancel_help::CancelHelp, command::CommandCall, detail::Detail, list::List,
-        list_directory::ListDirectory, sinfo::Sinfo, system_capacity::SystemCapacity,
+        list_directory::ListDirectory, sacct::Sacct, sinfo::Sinfo, system_capacity::SystemCapacity,
         tail_output::TailOutput,
     },
     containers::slurm_data::SlurmData,
@@ -55,6 +55,17 @@ fn main() -> ExitCode {
         }
         Commands::List { filter, values } => Box::new(List { filter, values }),
         Commands::Sinfo => Box::new(Sinfo {}),
+        Commands::Sacct {
+            username,
+            year,
+            month,
+            day,
+        } => Box::new(Sacct {
+            username,
+            year,
+            month,
+            day,
+        }),
     };
 
     let structure: SlurmData = match get_structure(cli.all, requires_all_in_queue) {

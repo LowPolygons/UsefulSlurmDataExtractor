@@ -1,0 +1,106 @@
+use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+
+use crate::containers::{SlurmMeta, SlurmSetInfiniteNumberContainer};
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctData {
+    pub meta: SlurmMeta,
+    pub warnings: Vec<HashMap<String, String>>,
+    pub errors: Vec<HashMap<String, String>>,
+    pub jobs: Vec<SacctJob>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctJob {
+    pub account: String,
+    pub comment: HashMap<String, String>,
+    pub allocation_nodes: i64,
+    pub array: SacctArray,
+    pub association: HashMap<String, String>,
+    pub block: String,
+    pub cluster: String,
+    pub container: String,
+    pub derived_exit_code: SacctExitCode,
+    pub time: SacctTime,
+    pub exit_code: SacctExitCode,
+    pub extra: String,
+    pub failed_node: String,
+    pub flags: Vec<String>,
+    pub group: String,
+    // ignoring 'het'
+    pub job_id: i64,
+    pub name: String,
+    pub licenses: String,
+    // ignoring mcs
+    pub nodes: String,
+    pub partition: String,
+    pub hold: bool,
+    pub priority: SlurmSetInfiniteNumberContainer,
+    pub qos: String,
+    pub required: SacctRequired,
+    pub kill_request_user: String,
+    // ignoring reservation
+    pub script: String,
+    pub state: HashMap<String, String>,
+    // ignoring steps
+    pub submit_line: String,
+    pub tres: SacctTres,
+    pub used_gres: String,
+    pub user: String,
+    // Ignoring wckey
+    pub working_directory: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctTres {
+    pub allocated: Vec<SacctTresAllocReq>,
+    pub requested: Vec<SacctTresAllocReq>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctTresAllocReq {
+    #[serde(rename = "type")]
+    pub key_is_type: String,
+    pub name: String,
+    pub id: i64,
+    pub countr: i64,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctRequired {
+    #[serde(rename = "CPUs")]
+    pub cpus: i64,
+    pub memory_per_cpu: SlurmSetInfiniteNumberContainer,
+    pub memory_per_node: SlurmSetInfiniteNumberContainer,
+    pub memory: i64,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctArray {
+    pub job_id: i64,
+    // Ignoring 'limits' key
+    pub task_id: SlurmSetInfiniteNumberContainer,
+    pub task: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctExitCode {
+    pub status: String,
+    pub return_code: i64,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctTime {
+    pub elapsed: i64,
+    pub eligible: i64,
+    pub end: i64,
+    pub start: i64,
+    pub submission: i64,
+    pub suspended: i64,
+    pub system: HashMap<String, i64>,
+    pub limit: SlurmSetInfiniteNumberContainer,
+    pub total: HashMap<String, i64>,
+    pub user: HashMap<String, i64>,
+}

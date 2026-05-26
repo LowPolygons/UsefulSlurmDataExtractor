@@ -71,6 +71,21 @@ pub enum Commands {
 
     #[command(about = "Use to nicely format some info from the sinfo command")]
     Sinfo,
+
+    #[command(about = "Use to nicely format some info from the sacct")]
+    Sacct {
+        #[arg(long)]
+        username: String,
+
+        #[arg(long, required = false)]
+        year: Option<i16>,
+
+        #[arg(long, required = false)]
+        month: Option<i8>,
+
+        #[arg(long, required = false)]
+        day: Option<i8>,
+    },
 }
 
 #[derive(Parser)]

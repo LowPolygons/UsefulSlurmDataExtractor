@@ -12,6 +12,7 @@ pub mod command;
 pub mod detail;
 pub mod list;
 pub mod list_directory;
+pub mod sacct;
 pub mod sinfo;
 pub mod system_capacity;
 pub mod tail_output;
