@@ -78,13 +78,7 @@ pub enum Commands {
         username: String,
 
         #[arg(long, required = false)]
-        year: Option<i16>,
-
-        #[arg(long, required = false)]
-        month: Option<i8>,
-
-        #[arg(long, required = false)]
-        day: Option<i8>,
+        backlog_days: Option<i16>,
     },
 }
 

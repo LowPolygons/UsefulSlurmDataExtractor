@@ -57,14 +57,10 @@ fn main() -> ExitCode {
         Commands::Sinfo => Box::new(Sinfo {}),
         Commands::Sacct {
             username,
-            year,
-            month,
-            day,
+            backlog_days,
         } => Box::new(Sacct {
             username,
-            year,
-            month,
-            day,
+            backlog_days,
         }),
     };
 

@@ -1,5 +1,7 @@
 use std::process::Command;
 
+use chrono::{Duration, Utc};
+
 use crate::{
     commands::command::CommandCall,
     containers::{sacct_data::SacctData, slurm_data::SlurmData},
@@ -10,27 +12,19 @@ use crate::{
 
 pub struct Sacct {
     pub username: String,
-    pub year: Option<i16>,
-    pub month: Option<i8>,
-    pub day: Option<i8>,
+    pub backlog_days: Option<i16>,
 }
 
 impl CommandCall for Sacct {
     fn command(&self, _: &SlurmData) -> Result<(), ()> {
         let start_time: String;
 
-        if let Some(year) = self.year
-            && let Some(month) = self.month
-            && let Some(day) = self.day
-        {
-            start_time = format!("{}-{}-{}", year, month, day);
-        } else if self.year.is_none() && self.month.is_none() && self.day.is_none() {
-            start_time = String::from("2026-01-01");
+        if let Some(days) = self.backlog_days {
+            let target_data = Utc::now() - Duration::days(days as i64);
+
+            start_time = target_data.format("%Y-%m-%d").to_string();
         } else {
-            println!(
-                "When using this command, you should either provide all 3 optional time arguments, or none"
-            );
-            return Err(());
+            start_time = String::from("2026-01-01");
         }
 
         let sacct_output = Command::new("sacct")
@@ -66,6 +60,8 @@ impl CommandCall for Sacct {
                 })?;
                 Ok(())
             })?;
+
+        println!("Listed info for {} jobs", structure.jobs.len());
 
         return Ok(());
     }
