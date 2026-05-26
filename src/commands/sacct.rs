@@ -13,8 +13,8 @@ use crate::{
 };
 
 pub struct Sacct {
-    pub username: String,
-    pub backlog_days: Option<i16>,
+    pub user: String,
+    pub days: Option<i16>,
     pub filter: Option<FilterOptions>,
     pub values: Vec<String>,
 }
@@ -23,7 +23,7 @@ impl CommandCall for Sacct {
     fn command(&self, _: &SlurmData) -> Result<(), ()> {
         let start_time: String;
 
-        if let Some(days) = self.backlog_days {
+        if let Some(days) = self.days {
             let target_data = Utc::now() - Duration::days(days as i64);
 
             start_time = target_data.format("%Y-%m-%d").to_string();
@@ -32,7 +32,7 @@ impl CommandCall for Sacct {
         }
 
         let sacct_output = Command::new("sacct")
-            .args(["--user", &self.username])
+            .args(["--user", &self.user])
             .args(["--starttime", &start_time])
             .arg("--json")
             .output();

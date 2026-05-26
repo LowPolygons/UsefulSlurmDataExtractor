@@ -56,13 +56,13 @@ fn main() -> ExitCode {
         Commands::List { filter, values } => Box::new(List { filter, values }),
         Commands::Sinfo => Box::new(Sinfo {}),
         Commands::Sacct {
-            username,
-            backlog_days,
+            user,
+            days,
             filter,
             values,
         } => Box::new(Sacct {
-            username,
-            backlog_days,
+            user,
+            days,
             filter,
             values,
         }),

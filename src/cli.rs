@@ -75,10 +75,14 @@ pub enum Commands {
     #[command(about = "Use to nicely format some info from the sacct")]
     Sacct {
         #[arg(long)]
-        username: String,
+        user: String,
 
-        #[arg(long, required = false)]
-        backlog_days: Option<i16>,
+        #[arg(
+            long,
+            required = false,
+            help = "How many days back from today the list should contain job info for"
+        )]
+        days: Option<i16>,
 
         #[arg(long, value_enum)]
         filter: Option<FilterOptions>,
