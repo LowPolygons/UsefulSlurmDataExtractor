@@ -47,7 +47,7 @@ User Name and ID: [username], [user_id]
 Job status: PENDING
 --------------------------
 Submit Time: 20XX-XX-XX XX:XX:XX UTC
-Latest Start Time: 20XX-XX-XX XX:XX:XX UTC
+Start Time: 20XX-XX-XX XX:XX:XX UTC
 Job directory: /dir/sbatch/was/run/from
 ==========================
 ...
@@ -74,7 +74,7 @@ User Name and ID: [username], [user_id]
 Job status: PENDING
 --------------------------
 Submit Time: 20XX-XX-XX XX:XX:XX UTC
-Latest Start Time: 20XX-XX-XX XX:XX:XX UTC
+Start Time: 20XX-XX-XX XX:XX:XX UTC
 Running Time: XX:XX:XX
 Job directory: /dir/sbatch/was/run/from
 --------------------------
@@ -196,4 +196,33 @@ Example:
 There are 718 jobs in total
 In total, 339 are 'RUNNING' and 377 are 'PENDING', and 2 other
 The running jobs are using 1049 nodes, and the pending jobs will use 1600 nodes
+```
+
+## Sacct
+```sh
+SlurmHelper sacct
+        --user [username] 
+        [--filter [filter] [values]]
+        [--days [num days back]]
+```
+
+This will list information extracted from the 'sacct' command, showing information about previous jobs.
+
+If the user does not provide the --days flag, it defaults to 100 days
+
+Example:
+```sh
+>>> SlurmHelper sacct --user [username] --days N
+============================
+Job Name & ID: [NAME], [ID] 
+User Name and ID: [username], N/A
+Job status: COMPLETED
+--------------------------
+Submit Time: 20XX-XX-XX XX:XX:XX UTC
+Start Time: 20XX-XX-XX XX:XX:XX UTC
+Running Time: XX:XX:XX
+Job directory: /dir/sbatch/was/run/from
+============================
+Listed info for 1 jobs
+============================
 ```

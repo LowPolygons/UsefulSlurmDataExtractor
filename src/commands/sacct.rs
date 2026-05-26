@@ -23,13 +23,13 @@ impl CommandCall for Sacct {
     fn command(&self, _: &SlurmData) -> Result<(), ()> {
         let start_time: String;
 
-        if let Some(days) = self.days {
-            let target_data = Utc::now() - Duration::days(days as i64);
-
-            start_time = target_data.format("%Y-%m-%d").to_string();
+        let target_data = if let Some(days) = self.days {
+            Utc::now() - Duration::days(days as i64)
         } else {
-            start_time = String::from("2026-01-01");
-        }
+            Utc::now() - Duration::days(100)
+        };
+
+        start_time = target_data.format("%Y-%m-%d").to_string();
 
         let sacct_output = Command::new("sacct")
             .args(["--user", &self.user])
