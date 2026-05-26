@@ -65,7 +65,7 @@ pub struct SacctTresAllocReq {
     pub key_is_type: String,
     pub name: String,
     pub id: i64,
-    pub countr: i64,
+    pub count: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
