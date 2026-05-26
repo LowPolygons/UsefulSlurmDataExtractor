@@ -59,8 +59,8 @@ pub fn print_help_filter_info(
             let mut all_status: Vec<String> = vec![];
 
             all_jobs.iter().for_each(|job| {
-                if !all_status.contains(&job.get_account()) {
-                    all_status.push(job.get_account())
+                if !all_status.contains(&job.get_job_status()) {
+                    all_status.push(job.get_job_status())
                 }
             });
 
@@ -71,8 +71,8 @@ pub fn print_help_filter_info(
             let mut all_usernames: Vec<String> = vec![];
 
             all_jobs.iter().for_each(|job| {
-                if !all_usernames.contains(&job.get_account()) {
-                    all_usernames.push(job.get_account())
+                if !all_usernames.contains(&job.get_username()) {
+                    all_usernames.push(job.get_username())
                 }
             });
 
