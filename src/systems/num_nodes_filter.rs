@@ -1,4 +1,7 @@
-use crate::{containers::slurm_data::SlurmJob, systems::filter::Filterable};
+use crate::{
+    containers::slurm_data::SlurmJob,
+    systems::filter::{ExtractsFilterableCategories, Filterable},
+};
 
 pub struct NumNodesFilter {
     node_counts: Vec<u16>,
@@ -23,7 +26,7 @@ impl NumNodesFilter {
 }
 
 impl Filterable for NumNodesFilter {
-    fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        self.node_counts.contains(&(job.node_count.number as u16))
+    fn does_job_meet_filter_reqs(&self, job: &dyn ExtractsFilterableCategories) -> bool {
+        self.node_counts.contains(&(job.get_num_nodes()))
     }
 }

@@ -1,4 +1,7 @@
-use crate::{containers::slurm_data::SlurmJob, systems::filter::Filterable};
+use crate::{
+    containers::{slurm_data::SlurmJob, useful_slurm_job_info::UsefulJobInfo},
+    systems::filter::{ExtractsFilterableCategories, Filterable},
+};
 
 pub struct DirectoryFilter {
     directories: Vec<String>,
@@ -11,10 +14,10 @@ impl DirectoryFilter {
 }
 
 impl Filterable for DirectoryFilter {
-    fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
+    fn does_job_meet_filter_reqs(&self, job: &dyn ExtractsFilterableCategories) -> bool {
         let mut success: bool = false;
         self.directories.iter().for_each(|dir| {
-            if job.current_working_directory.contains(dir) {
+            if job.get_directory().contains(dir) {
                 success = true;
             }
         });

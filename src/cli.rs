@@ -79,6 +79,12 @@ pub enum Commands {
 
         #[arg(long, required = false)]
         backlog_days: Option<i16>,
+
+        #[arg(long, value_enum)]
+        filter: Option<FilterOptions>,
+
+        #[arg(required = false, num_args = 1..)]
+        values: Vec<String>,
     },
 }
 

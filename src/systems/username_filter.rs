@@ -1,4 +1,7 @@
-use crate::{containers::slurm_data::SlurmJob, systems::filter::Filterable};
+use crate::{
+    containers::slurm_data::SlurmJob,
+    systems::filter::{ExtractsFilterableCategories, Filterable},
+};
 
 pub struct UsernameFilter {
     usernames: Vec<String>,
@@ -11,7 +14,7 @@ impl UsernameFilter {
 }
 
 impl Filterable for UsernameFilter {
-    fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        self.usernames.contains(&job.user_name)
+    fn does_job_meet_filter_reqs(&self, job: &dyn ExtractsFilterableCategories) -> bool {
+        self.usernames.contains(&job.get_username())
     }
 }

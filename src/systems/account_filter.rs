@@ -1,6 +1,6 @@
 use crate::{
     containers::slurm_data::SlurmJob,
-    systems::filter::Filterable,
+    systems::filter::{ExtractsFilterableCategories, Filterable},
 };
 
 pub struct AccountFilter {
@@ -14,7 +14,7 @@ impl AccountFilter {
 }
 
 impl Filterable for AccountFilter {
-    fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        self.account_names.contains(&job.account)
+    fn does_job_meet_filter_reqs(&self, job: &dyn ExtractsFilterableCategories) -> bool {
+        self.account_names.contains(&job.get_account())
     }
 }

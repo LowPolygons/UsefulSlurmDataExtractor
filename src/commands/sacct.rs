@@ -3,8 +3,10 @@ use std::process::Command;
 use chrono::{Duration, Utc};
 
 use crate::{
+    cli::FilterOptions,
     commands::command::CommandCall,
     containers::{sacct_data::SacctData, slurm_data::SlurmData},
+    systems::filter::get_filter_object,
     utils::{
         json_string_to_struct::json_string_to_struct, print_common_job_info::print_common_job_info,
     },
@@ -13,6 +15,8 @@ use crate::{
 pub struct Sacct {
     pub username: String,
     pub backlog_days: Option<i16>,
+    pub filter: Option<FilterOptions>,
+    pub values: Vec<String>,
 }
 
 impl CommandCall for Sacct {
@@ -49,17 +53,30 @@ impl CommandCall for Sacct {
             return ();
         })?;
 
-        structure
-            .jobs
-            .iter()
-            .try_for_each(|job| -> Result<(), ()> {
-                print_common_job_info(job).map_err(|e| {
-                    println!("Error printing job info: {e}");
+        let filtered_jobs = match &self.filter {
+            Some(filter_choice) => {
+                if let Some(filter_obj) = get_filter_object(&filter_choice, self.values.clone()) {
+                    structure
+                        .jobs
+                        .clone()
+                        .into_iter()
+                        .filter(|job| filter_obj.does_job_meet_filter_reqs(job))
+                        .collect()
+                } else {
+                    structure.jobs.clone()
+                }
+            }
+            None => structure.jobs.clone(),
+        };
 
-                    return ();
-                })?;
-                Ok(())
+        filtered_jobs.iter().try_for_each(|job| -> Result<(), ()> {
+            print_common_job_info(job).map_err(|e| {
+                println!("Error printing job info: {e}");
+
+                return ();
             })?;
+            Ok(())
+        })?;
 
         println!("Listed info for {} jobs", structure.jobs.len());
 

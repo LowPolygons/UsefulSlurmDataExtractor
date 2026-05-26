@@ -1,4 +1,7 @@
-use crate::{containers::slurm_data::SlurmJob, systems::filter::Filterable};
+use crate::{
+    containers::slurm_data::SlurmJob,
+    systems::filter::{ExtractsFilterableCategories, Filterable},
+};
 
 pub struct JobStatusFilter {
     status: Vec<String>,
@@ -11,7 +14,7 @@ impl JobStatusFilter {
 }
 
 impl Filterable for JobStatusFilter {
-    fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
-        self.status.contains(&job.job_state)
+    fn does_job_meet_filter_reqs(&self, job: &dyn ExtractsFilterableCategories) -> bool {
+        self.status.contains(&job.get_job_status())
     }
 }

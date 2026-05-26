@@ -8,8 +8,17 @@ use crate::{
     },
 };
 
+pub trait ExtractsFilterableCategories {
+    fn get_directory(&self) -> String;
+    fn get_name(&self) -> String;
+    fn get_job_status(&self) -> String;
+    fn get_num_nodes(&self) -> u16;
+    fn get_account(&self) -> String;
+    fn get_username(&self) -> String;
+}
+
 pub trait Filterable {
-    fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool;
+    fn does_job_meet_filter_reqs(&self, job: &dyn ExtractsFilterableCategories) -> bool;
 }
 
 pub fn get_filter_object(

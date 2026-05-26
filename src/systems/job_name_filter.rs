@@ -1,4 +1,7 @@
-use crate::{containers::slurm_data::SlurmJob, systems::filter::Filterable};
+use crate::{
+    containers::slurm_data::SlurmJob,
+    systems::filter::{ExtractsFilterableCategories, Filterable},
+};
 
 pub struct JobNameFilter {
     name_contains: Vec<String>,
@@ -11,10 +14,10 @@ impl JobNameFilter {
 }
 
 impl Filterable for JobNameFilter {
-    fn does_job_meet_filter_reqs(&self, job: &SlurmJob) -> bool {
+    fn does_job_meet_filter_reqs(&self, job: &dyn ExtractsFilterableCategories) -> bool {
         let mut success: bool = false;
         self.name_contains.iter().for_each(|dir| {
-            if job.name.contains(dir) {
+            if job.get_name().contains(dir) {
                 success = true;
             }
         });

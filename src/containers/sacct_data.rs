@@ -2,8 +2,11 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::containers::{
-    SlurmMeta, SlurmSetInfiniteNumberContainer, useful_slurm_job_info::UsefulJobInfo,
+use crate::{
+    containers::{
+        SlurmMeta, SlurmSetInfiniteNumberContainer, useful_slurm_job_info::UsefulJobInfo,
+    },
+    systems::filter::ExtractsFilterableCategories,
 };
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -53,6 +56,32 @@ pub struct SacctJob {
     pub user: String,
     // Ignoring wckey
     pub working_directory: String,
+}
+
+impl ExtractsFilterableCategories for SacctJob {
+    fn get_directory(&self) -> String {
+        self.working_directory.clone()
+    }
+
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn get_job_status(&self) -> String {
+        self.exit_code.status.clone()
+    }
+
+    fn get_num_nodes(&self) -> u16 {
+        0
+    }
+
+    fn get_account(&self) -> String {
+        self.account.clone()
+    }
+
+    fn get_username(&self) -> String {
+        self.user.clone()
+    }
 }
 
 impl UsefulJobInfo for SacctJob {

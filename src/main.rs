@@ -58,9 +58,13 @@ fn main() -> ExitCode {
         Commands::Sacct {
             username,
             backlog_days,
+            filter,
+            values,
         } => Box::new(Sacct {
             username,
             backlog_days,
+            filter,
+            values,
         }),
     };
 

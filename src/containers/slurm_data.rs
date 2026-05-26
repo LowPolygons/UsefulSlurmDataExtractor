@@ -1,6 +1,7 @@
 use crate::containers::{
-    SlurmMeta, SlurmSetInfiniteNumberContainer, useful_slurm_job_info::UsefulJobInfo,
+    useful_slurm_job_info::UsefulJobInfo, SlurmMeta, SlurmSetInfiniteNumberContainer,
 };
+use crate::systems::filter::ExtractsFilterableCategories;
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -146,6 +147,32 @@ pub struct SlurmJob {
     pub maximum_switch_wait_time: i64,
     pub wckey: String,
     pub current_working_directory: String,
+}
+
+impl ExtractsFilterableCategories for SlurmJob {
+    fn get_directory(&self) -> String {
+        self.current_working_directory.clone()
+    }
+
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn get_job_status(&self) -> String {
+        self.job_state.clone()
+    }
+
+    fn get_num_nodes(&self) -> u16 {
+        self.node_count.number as u16
+    }
+
+    fn get_account(&self) -> String {
+        self.account.clone()
+    }
+
+    fn get_username(&self) -> String {
+        self.user_name.clone()
+    }
 }
 
 impl UsefulJobInfo for SlurmJob {
