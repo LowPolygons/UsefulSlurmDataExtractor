@@ -1,7 +1,4 @@
-use crate::{
-    containers::slurm_data::SlurmJob,
-    systems::filter::{ExtractsFilterableCategories, Filterable},
-};
+use crate::systems::filter::{ExtractsFilterableCategories, Filterable};
 
 pub struct NumNodesFilter {
     node_counts: Vec<u16>,

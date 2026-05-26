@@ -3,7 +3,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use chrono::DateTime;
 
 use crate::{
-    containers::{slurm_data::SlurmJob, useful_slurm_job_info::UsefulJobInfo},
+    containers::useful_slurm_job_info::UsefulJobInfo,
     utils::secs_to_nice_time::secs_to_nice_time,
 };
 
@@ -26,7 +26,7 @@ pub fn print_common_job_info(job_data: &impl UsefulJobInfo) -> Result<(), String
             .expect("Could not determine")
     );
     println!(
-        "Latest Start Time: {}",
+        "Start Time: {}",
         DateTime::from_timestamp(job_data.get_start_time() as i64, 0).expect("Could not determine")
     );
     if job_data.get_job_state() == "RUNNING" {

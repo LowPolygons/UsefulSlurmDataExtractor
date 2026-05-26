@@ -1,4 +1,4 @@
-use std::{env, path::Path};
+use std::env;
 
 use chrono::DateTime;
 use dialoguer::{Select, theme::ColorfulTheme};

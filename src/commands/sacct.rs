@@ -69,6 +69,7 @@ impl CommandCall for Sacct {
             None => structure.jobs.clone(),
         };
 
+        println!("============================");
         filtered_jobs.iter().try_for_each(|job| -> Result<(), ()> {
             print_common_job_info(job).map_err(|e| {
                 println!("Error printing job info: {e}");
@@ -78,7 +79,9 @@ impl CommandCall for Sacct {
             Ok(())
         })?;
 
-        println!("Listed info for {} jobs", structure.jobs.len());
+        println!("============================");
+        println!("Listed info for {} jobs", filtered_jobs.len());
+        println!("============================");
 
         return Ok(());
     }

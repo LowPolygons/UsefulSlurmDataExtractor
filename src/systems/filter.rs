@@ -1,6 +1,5 @@
 use crate::{
     cli::FilterOptions,
-    containers::slurm_data::SlurmJob,
     systems::{
         account_filter::AccountFilter, directory_filter::DirectoryFilter,
         job_name_filter::JobNameFilter, job_status_filter::JobStatusFilter,

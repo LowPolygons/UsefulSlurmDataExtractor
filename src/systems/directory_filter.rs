@@ -1,7 +1,4 @@
-use crate::{
-    containers::{slurm_data::SlurmJob, useful_slurm_job_info::UsefulJobInfo},
-    systems::filter::{ExtractsFilterableCategories, Filterable},
-};
+use crate::systems::filter::{ExtractsFilterableCategories, Filterable};
 
 pub struct DirectoryFilter {
     directories: Vec<String>,

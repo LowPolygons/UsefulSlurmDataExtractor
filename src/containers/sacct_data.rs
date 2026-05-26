@@ -68,7 +68,10 @@ impl ExtractsFilterableCategories for SacctJob {
     }
 
     fn get_job_status(&self) -> String {
-        self.exit_code.status.clone()
+        match self.state.get("current") {
+            Some(v) => v.clone(),
+            None => String::from("Not Found"),
+        }
     }
 
     fn get_num_nodes(&self) -> u16 {
@@ -102,7 +105,10 @@ impl UsefulJobInfo for SacctJob {
     }
 
     fn get_job_state(&self) -> &String {
-        &self.exit_code.status
+        match self.state.get("current") {
+            Some(v) => v,
+            None => &self.exit_code.status,
+        }
     }
 
     fn get_submit_time(&self) -> u64 {
