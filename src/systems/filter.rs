@@ -37,3 +37,48 @@ pub fn get_filter_object(
         FilterOptions::None => None,
     };
 }
+
+pub fn print_help_filter_info(
+    all_jobs: &Vec<impl ExtractsFilterableCategories>,
+    category: &FilterOptions,
+) {
+    match category {
+        FilterOptions::Account => {
+            let mut all_accounts: Vec<String> = vec![];
+
+            all_jobs.iter().for_each(|job| {
+                if !all_accounts.contains(&job.get_account()) {
+                    all_accounts.push(job.get_account())
+                }
+            });
+
+            println!("The full list of jobs has this range of 'accounts':");
+            all_accounts.iter().for_each(|x| println!("- {x}"));
+        }
+        FilterOptions::JobStatus => {
+            let mut all_status: Vec<String> = vec![];
+
+            all_jobs.iter().for_each(|job| {
+                if !all_status.contains(&job.get_account()) {
+                    all_status.push(job.get_account())
+                }
+            });
+
+            println!("The full list of jobs has this range of 'status':");
+            all_status.iter().for_each(|x| println!("- {x}"));
+        }
+        FilterOptions::Username => {
+            let mut all_usernames: Vec<String> = vec![];
+
+            all_jobs.iter().for_each(|job| {
+                if !all_usernames.contains(&job.get_account()) {
+                    all_usernames.push(job.get_account())
+                }
+            });
+
+            println!("The full list of jobs has this range of 'usernames':");
+            all_usernames.iter().for_each(|x| println!("- {x}"));
+        }
+        _ => {}
+    }
+}

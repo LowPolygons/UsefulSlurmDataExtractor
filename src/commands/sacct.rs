@@ -6,7 +6,7 @@ use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
     containers::{sacct_data::SacctData, slurm_data::SlurmData},
-    systems::filter::get_filter_object,
+    systems::filter::{get_filter_object, print_help_filter_info},
     utils::{
         json_string_to_struct::json_string_to_struct, print_common_job_info::print_common_job_info,
     },
@@ -82,6 +82,13 @@ impl CommandCall for Sacct {
         println!("============================");
         println!("Listed info for {} jobs", filtered_jobs.len());
         println!("============================");
+
+        if filtered_jobs.len() == 0
+            && structure.jobs.len() != 0
+            && let Some(filter_choice) = &self.filter
+        {
+            print_help_filter_info(&structure.jobs, &filter_choice);
+        }
 
         return Ok(());
     }

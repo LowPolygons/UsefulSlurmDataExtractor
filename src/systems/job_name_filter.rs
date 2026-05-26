@@ -21,4 +21,9 @@ impl Filterable for JobNameFilter {
 
         success
     }
+
+    // fn print_help_text(&self, all_jobs: &Vec<Box<dyn ExtractsFilterableCategories>>) {
+    //     // Not helpful for job name
+    //     // Its technically a violation of ISP but its so insubstantially small
+    // }
 }

@@ -6,6 +6,7 @@ use crate::{
     cli::FilterOptions,
     commands::{command::CommandCall, get_job_selection_through_menu, line_vec_from_file},
     containers::slurm_data::{SlurmData, SlurmJob},
+    systems::filter::print_help_filter_info,
     utils::{
         filtered_data_from_list::filtered_data_from_list,
         print_common_job_info::print_common_job_info,
@@ -51,6 +52,12 @@ impl CommandCall for Detail {
                 get_job_selection_through_menu(&filtered_data, default_options).map_err(|_| ())?;
 
             if selection == 0 {
+                if filtered_data.len() == 0
+                    && structure.jobs.len() != 0
+                    && let Some(filter_choice) = &self.filter
+                {
+                    print_help_filter_info(&structure.jobs, &filter_choice);
+                }
                 return Ok(());
             }
 

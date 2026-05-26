@@ -26,4 +26,9 @@ impl Filterable for NumNodesFilter {
     fn does_job_meet_filter_reqs(&self, job: &dyn ExtractsFilterableCategories) -> bool {
         self.node_counts.contains(&(job.get_num_nodes()))
     }
+
+    // fn print_help_text(&self, all_jobs: &Vec<Box<dyn ExtractsFilterableCategories>>) {
+    //     // Not helpful for num nodes
+    //     // Its technically a violation of ISP but its so insubstantially small
+    // }
 }

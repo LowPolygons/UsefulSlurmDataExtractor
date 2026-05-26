@@ -2,6 +2,7 @@ use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
     containers::slurm_data::SlurmData,
+    systems::filter::print_help_filter_info,
     utils::{
         filtered_data_from_list::filtered_data_from_list,
         print_common_job_info::print_common_job_info,
@@ -33,6 +34,12 @@ impl CommandCall for List {
         println!("Listed info for {} jobs", filtered_data.len());
         println!("==========================");
 
+        if filtered_data.len() == 0
+            && slurm_data.jobs.len() != 0
+            && let Some(filter_choice) = &self.filter
+        {
+            print_help_filter_info(&slurm_data.jobs, &filter_choice);
+        }
         Ok(())
     }
 }

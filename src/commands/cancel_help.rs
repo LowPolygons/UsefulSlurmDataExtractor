@@ -7,6 +7,7 @@ use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
     containers::slurm_data::{SlurmData, SlurmJob},
+    systems::filter::print_help_filter_info,
     utils::filtered_data_from_list::filtered_data_from_list,
 };
 
@@ -102,6 +103,13 @@ impl CommandCall for CancelHelp {
             println!("Wrote the file 'slurm_helper_cancel_script.sh' to your current directory.");
         } else {
             println!("No jobs chosen to cancel.");
+        }
+
+        if filtered_data.len() == 0
+            && structure.jobs.len() != 0
+            && let Some(filter_choice) = &self.filter
+        {
+            print_help_filter_info(&structure.jobs, &filter_choice);
         }
         Ok(())
     }
