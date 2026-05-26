@@ -3,7 +3,9 @@ use std::process::Command;
 use crate::{
     commands::command::CommandCall,
     containers::{sacct_data::SacctData, slurm_data::SlurmData},
-    utils::json_string_to_struct::json_string_to_struct,
+    utils::{
+        json_string_to_struct::json_string_to_struct, print_common_job_info::print_common_job_info,
+    },
 };
 
 pub struct Sacct {
@@ -53,12 +55,17 @@ impl CommandCall for Sacct {
             return ();
         })?;
 
-        structure.jobs.iter().for_each(|job| {
-            println!("=========================");
-            println!("User: {}", job.user);
-            println!("Directory: {}", job.working_directory);
-            println!("Return Status: {}", job.exit_code.status);
-        });
+        structure
+            .jobs
+            .iter()
+            .try_for_each(|job| -> Result<(), ()> {
+                print_common_job_info(job).map_err(|e| {
+                    println!("Error printing job info: {e}");
+
+                    return ();
+                })?;
+                Ok(())
+            })?;
 
         return Ok(());
     }

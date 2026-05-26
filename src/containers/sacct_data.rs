@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::containers::{SlurmMeta, SlurmSetInfiniteNumberContainer};
+use crate::containers::{
+    SlurmMeta, SlurmSetInfiniteNumberContainer, useful_slurm_job_info::UsefulJobInfo,
+};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SacctData {
@@ -30,7 +32,7 @@ pub struct SacctJob {
     pub flags: Vec<String>,
     pub group: String,
     // ignoring 'het'
-    pub job_id: i64,
+    pub job_id: u64,
     pub name: String,
     pub licenses: String,
     // ignoring mcs
@@ -51,6 +53,44 @@ pub struct SacctJob {
     pub user: String,
     // Ignoring wckey
     pub working_directory: String,
+}
+
+impl UsefulJobInfo for SacctJob {
+    fn get_job_name(&self) -> &String {
+        &self.name
+    }
+
+    fn get_job_id(&self) -> String {
+        self.job_id.to_string()
+    }
+
+    fn get_user_name(&self) -> &String {
+        &self.user
+    }
+
+    fn get_user_id(&self) -> String {
+        String::from("N/A")
+    }
+
+    fn get_job_state(&self) -> &String {
+        &self.exit_code.status
+    }
+
+    fn get_submit_time(&self) -> u64 {
+        self.time.submission
+    }
+
+    fn get_start_time(&self) -> u64 {
+        self.time.start
+    }
+
+    fn get_end_time(&self) -> u64 {
+        self.time.end
+    }
+
+    fn get_directory(&self) -> &String {
+        &self.working_directory
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -93,12 +133,12 @@ pub struct SacctExitCode {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SacctTime {
-    pub elapsed: i64,
-    pub eligible: i64,
-    pub end: i64,
-    pub start: i64,
-    pub submission: i64,
-    pub suspended: i64,
+    pub elapsed: u64,
+    pub eligible: u64,
+    pub end: u64,
+    pub start: u64,
+    pub submission: u64,
+    pub suspended: u64,
     pub system: HashMap<String, i64>,
     pub limit: SlurmSetInfiniteNumberContainer,
     pub total: HashMap<String, i64>,

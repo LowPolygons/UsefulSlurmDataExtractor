@@ -1,4 +1,6 @@
-use crate::containers::{SlurmMeta, SlurmSetInfiniteNumberContainer};
+use crate::containers::{
+    SlurmMeta, SlurmSetInfiniteNumberContainer, useful_slurm_job_info::UsefulJobInfo,
+};
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -144,6 +146,44 @@ pub struct SlurmJob {
     pub maximum_switch_wait_time: i64,
     pub wckey: String,
     pub current_working_directory: String,
+}
+
+impl UsefulJobInfo for SlurmJob {
+    fn get_job_name(&self) -> &String {
+        &self.name
+    }
+
+    fn get_job_id(&self) -> String {
+        self.job_id.to_string()
+    }
+
+    fn get_user_name(&self) -> &String {
+        &self.user_name
+    }
+
+    fn get_user_id(&self) -> String {
+        self.user_id.to_string()
+    }
+
+    fn get_job_state(&self) -> &String {
+        &self.job_state
+    }
+
+    fn get_submit_time(&self) -> u64 {
+        self.submit_time
+    }
+
+    fn get_start_time(&self) -> u64 {
+        self.start_time
+    }
+
+    fn get_end_time(&self) -> u64 {
+        self.end_time
+    }
+
+    fn get_directory(&self) -> &String {
+        &self.current_working_directory
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
