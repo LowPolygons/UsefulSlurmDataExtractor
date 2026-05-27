@@ -90,11 +90,6 @@ impl CommandCall for Sacct {
                         .expect("Could not determine")
                 );
                 println!(
-                    "Actual job length: {}",
-                    secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
-                );
-
-                println!(
                     "Time Limit: {}",
                     secs_as_num_to_nice_time((job.time.limit.number * 60.0) as f64)
                 );
