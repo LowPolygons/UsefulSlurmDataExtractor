@@ -9,5 +9,5 @@ pub fn secs_to_nice_time(secs: Duration) -> String {
     let num_minutes: u64 = hours_leftovers / 60;
     let num_secs = hours_leftovers % 60;
 
-    return format!("{}:{}:{}", num_hours, num_minutes, num_secs);
+    return format!("{:02}:{:02}:{:02}", num_hours, num_minutes, num_secs);
 }

@@ -86,7 +86,10 @@ impl CommandCall for Sacct {
             let num_minutes: u64 = hours_leftovers / 60;
             let num_secs = hours_leftovers % 60;
 
-            println!("Time Limit: {}:{}:{}", num_hours, num_minutes, num_secs);
+            println!(
+                "Time Limit: {:02}:{:02}:{:02}",
+                num_hours, num_minutes, num_secs
+            );
             Ok(())
         })?;
 
