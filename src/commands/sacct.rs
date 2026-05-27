@@ -76,6 +76,8 @@ impl CommandCall for Sacct {
 
                 return ();
             })?;
+            println!("Elapsed time: {}", job.time.elapsed / 3600);
+            println!("Limit: {}", job.time.limit.number / 60.0);
             Ok(())
         })?;
 
