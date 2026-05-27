@@ -9,6 +9,7 @@ use crate::{
     systems::filter::{get_filter_object, print_help_filter_info},
     utils::{
         json_string_to_struct::json_string_to_struct, print_common_job_info::print_common_job_info,
+        secs_to_nice_time::secs_to_nice_time,
     },
 };
 
@@ -76,8 +77,16 @@ impl CommandCall for Sacct {
 
                 return ();
             })?;
-            println!("Elapsed time: {}", job.time.elapsed / 3600);
-            println!("Limit: {}", job.time.limit.number / 60.0);
+
+            let num_secs_as_num = job.time.limit.number as u64 * 60;
+
+            let num_hours: u64 = num_secs_as_num as u64 / (60 * 60);
+            let hours_leftovers: u64 = (num_secs_as_num as u64) % (60 * 60);
+
+            let num_minutes: u64 = hours_leftovers / 60;
+            let num_secs = hours_leftovers % 60;
+
+            println!("Time Limit: {}:{}:{}", num_hours, num_minutes, num_secs);
             Ok(())
         })?;
 
