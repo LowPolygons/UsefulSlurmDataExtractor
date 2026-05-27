@@ -83,34 +83,29 @@ impl CommandCall for Sacct {
                 return ();
             })?;
 
-            println!(
-                "End time: {}",
-                DateTime::from_timestamp(job.get_end_time() as i64, 0)
-                    .expect("Could not determine")
-            );
-            println!(
-                "Actual job length: {}",
-                secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
-            );
+            if job.get_job_state() != "CANCELLED" {
+                println!(
+                    "End time: {}",
+                    DateTime::from_timestamp(job.get_end_time() as i64, 0)
+                        .expect("Could not determine")
+                );
+                println!(
+                    "Actual job length: {}",
+                    secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
+                );
 
-            println!(
-                "Time Limit: {}",
-                secs_as_num_to_nice_time((job.time.limit.number * 60.0) as f64)
-            );
+                println!(
+                    "Time Limit: {}",
+                    secs_as_num_to_nice_time((job.time.limit.number * 60.0) as f64)
+                );
 
-            println!(
-                "Actual Job Length: {}",
-                secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
-            );
-
-            println!(
-                "{} - {} = {}",
-                job.get_end_time(),
-                job.get_start_time(),
-                (job.get_end_time() - job.get_start_time())
-            );
-
+                println!(
+                    "Actual Job Length: {}",
+                    secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
+                );
+            }
             println!("============================");
+
             Ok(())
         })?;
 

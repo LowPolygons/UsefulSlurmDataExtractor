@@ -3,8 +3,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use chrono::DateTime;
 
 use crate::{
-    containers::useful_slurm_job_info::UsefulJobInfo,
-    utils::secs_to_nice_time::secs_to_nice_time,
+    containers::useful_slurm_job_info::UsefulJobInfo, utils::secs_to_nice_time::secs_to_nice_time,
 };
 
 pub fn print_common_job_info(job_data: &impl UsefulJobInfo) -> Result<(), String> {

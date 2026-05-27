@@ -116,7 +116,15 @@ impl UsefulJobInfo for SacctJob {
     }
 
     fn get_start_time(&self) -> u64 {
-        self.time.start
+        if let Some(state) = self.state.get("current") {
+            if state != "CANCELLED" {
+                self.time.start
+            } else {
+                0
+            }
+        } else {
+            self.time.start
+        }
     }
 
     fn get_end_time(&self) -> u64 {
