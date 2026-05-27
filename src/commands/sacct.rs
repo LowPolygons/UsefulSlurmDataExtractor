@@ -99,9 +99,18 @@ impl CommandCall for Sacct {
             );
 
             println!(
-                "Actual job length: {}",
+                "Actual Job Length: {}",
                 secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
             );
+
+            println!(
+                "{} - {} = {}",
+                job.get_end_time(),
+                job.get_start_time(),
+                (job.get_end_time() - job.get_start_time())
+            );
+
+            println!("============================");
             Ok(())
         })?;
 
