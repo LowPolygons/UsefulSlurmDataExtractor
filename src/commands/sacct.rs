@@ -98,6 +98,12 @@ impl CommandCall for Sacct {
                     "Actual Job Length: {}",
                     secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
                 );
+
+                println!("----------------------------");
+                println!(
+                    "Estimated CPU Memory Usage: ~{} GB",
+                    (job.required.cpus as f64 * job.required.memory_per_cpu.number as f64) / 1024.0
+                )
             }
             println!("============================");
 

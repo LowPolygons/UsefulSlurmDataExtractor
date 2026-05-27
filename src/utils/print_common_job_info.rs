@@ -21,18 +21,16 @@ pub fn print_common_job_info(job_data: &impl UsefulJobInfo) -> Result<(), String
     println!("--------------------------");
     println!(
         "Submit Time: {}",
-        DateTime::from_timestamp(job_data.get_submit_time() as i64, 0)
-            .expect("Could not determine")
+        get_time_from_timestamp_as_string(job_data.get_submit_time() as i64)
     );
     println!(
         "Start Time: {}",
-        DateTime::from_timestamp(job_data.get_start_time() as i64, 0).expect("Could not determine")
+        get_time_from_timestamp_as_string(job_data.get_start_time() as i64)
     );
     if job_data.get_job_state() == "RUNNING" {
         println!(
             "End Time: {}",
-            DateTime::from_timestamp(job_data.get_end_time() as i64, 0)
-                .expect("Could not determine")
+            get_time_from_timestamp_as_string(job_data.get_end_time() as i64)
         );
         println!(
             "Running Time: {}",
@@ -47,4 +45,12 @@ pub fn print_common_job_info(job_data: &impl UsefulJobInfo) -> Result<(), String
     }
     println!("Job directory: {}", job_data.get_directory());
     Ok(())
+}
+
+fn get_time_from_timestamp_as_string(time: i64) -> String {
+    if let Some(result) = DateTime::from_timestamp(time, 0) {
+        result.to_string()
+    } else {
+        String::from("Could not calculate")
+    }
 }
