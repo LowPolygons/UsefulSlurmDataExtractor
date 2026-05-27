@@ -1,15 +1,20 @@
-use std::process::Command;
+use std::{
+    process::Command,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
-use chrono::{Duration, Utc};
+use chrono::{DateTime, Duration, Utc};
 
 use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
-    containers::{sacct_data::SacctData, slurm_data::SlurmData},
+    containers::{
+        sacct_data::SacctData, slurm_data::SlurmData, useful_slurm_job_info::UsefulJobInfo,
+    },
     systems::filter::{get_filter_object, print_help_filter_info},
     utils::{
         json_string_to_struct::json_string_to_struct, print_common_job_info::print_common_job_info,
-        secs_to_nice_time::secs_to_nice_time,
+        secs_to_nice_time::secs_as_num_to_nice_time,
     },
 };
 
@@ -78,17 +83,24 @@ impl CommandCall for Sacct {
                 return ();
             })?;
 
-            let num_secs_as_num = job.time.limit.number as u64 * 60;
-
-            let num_hours: u64 = num_secs_as_num as u64 / (60 * 60);
-            let hours_leftovers: u64 = (num_secs_as_num as u64) % (60 * 60);
-
-            let num_minutes: u64 = hours_leftovers / 60;
-            let num_secs = hours_leftovers % 60;
+            println!(
+                "End time: {}",
+                DateTime::from_timestamp(job.get_end_time() as i64, 0)
+                    .expect("Could not determine")
+            );
+            println!(
+                "Actual job length: {}",
+                secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
+            );
 
             println!(
-                "Time Limit: {:02}:{:02}:{:02}",
-                num_hours, num_minutes, num_secs
+                "Time Limit: {}",
+                secs_as_num_to_nice_time((job.time.limit.number * 60.0) as f64)
+            );
+
+            println!(
+                "Actual job length: {}",
+                secs_as_num_to_nice_time((job.get_end_time() - job.get_start_time()) as f64)
             );
             Ok(())
         })?;
