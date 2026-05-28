@@ -102,6 +102,7 @@ impl CommandCall for Sacct {
                 );
 
                 println!("----------------------------");
+                println!("Number of CPUs: {}", job.required.cpus);
                 println!(
                     "Estimated CPU Memory Usage: ~{} GB",
                     (job.required.cpus as f64 * job.required.memory_per_cpu.number as f64) / 1024.0
