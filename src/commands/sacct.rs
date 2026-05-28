@@ -173,7 +173,7 @@ fn steps_info_printer(job: &SacctJob) {
             println!("/----/ Time /-----/");
             println!(
                 "Length of step: {}",
-                secs_as_num_to_nice_time(job.time.elapsed as f64)
+                secs_as_num_to_nice_time(step.time.elapsed as f64)
             )
         }
     });
