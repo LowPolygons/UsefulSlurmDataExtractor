@@ -49,13 +49,52 @@ pub struct SacctJob {
     // ignoring reservation
     pub script: String,
     pub state: HashMap<String, String>,
-    // ignoring steps
+    pub steps: Vec<SacctStep>,
     pub submit_line: String,
     pub tres: SacctTres,
     pub used_gres: String,
     pub user: String,
     // Ignoring wckey
     pub working_directory: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctStep {
+    pub time: SacctStepTime,
+    pub exit_code: SacctExitCode,
+    // Nodes ignored
+    // tasks ignored
+    // pid ignored
+    // CPU ignored
+    pub kill_request_user: String,
+    pub state: String,
+    // statistics ignored
+    pub step: SacctStepMetadata,
+    // task ignored
+    pub tres: SacctStepTres,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctStepTres {
+    pub requested: HashMap<String, Vec<SacctTresAllocReq>>,
+    pub allocated: Vec<SacctTresAllocReq>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctStepMetadata {
+    pub name: String,
+    // ID stuff as well, ignored
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctStepTime {
+    pub elapsed: u64,
+    pub end: u64,
+    pub start: u64,
+    // suspended
+    // system
+    // total
+    // user
 }
 
 impl ExtractsFilterableCategories for SacctJob {

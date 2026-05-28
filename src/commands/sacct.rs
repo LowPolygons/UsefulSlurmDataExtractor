@@ -9,7 +9,9 @@ use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
     containers::{
-        sacct_data::SacctData, slurm_data::SlurmData, useful_slurm_job_info::UsefulJobInfo,
+        sacct_data::{SacctData, SacctJob, SacctStep, SacctTresAllocReq},
+        slurm_data::SlurmData,
+        useful_slurm_job_info::UsefulJobInfo,
     },
     systems::filter::{get_filter_object, print_help_filter_info},
     utils::{
@@ -103,7 +105,9 @@ impl CommandCall for Sacct {
                 println!(
                     "Estimated CPU Memory Usage: ~{} GB",
                     (job.required.cpus as f64 * job.required.memory_per_cpu.number as f64) / 1024.0
-                )
+                );
+
+                steps_info_printer(job);
             }
             println!("============================");
 
@@ -123,4 +127,54 @@ impl CommandCall for Sacct {
 
         return Ok(());
     }
+}
+
+fn steps_info_printer(job: &SacctJob) {
+    if job.steps.len() == 0 {
+        return;
+    }
+
+    println!("This job had {} step(s)", job.steps.len());
+
+    let print_time_info = if job.steps.len() > 1 { true } else { false };
+
+    let empty_backup_vec: Vec<SacctTresAllocReq> = Vec::new();
+
+    println!("===== Step Info =====");
+    job.steps.iter().for_each(|step| {
+        println!("Name: {}", step.step.name);
+
+        println!("/----/ Memory Info /-----/");
+        let max = step.tres.requested.get("max").unwrap_or(&empty_backup_vec);
+        let avg = step
+            .tres
+            .requested
+            .get("average")
+            .unwrap_or(&empty_backup_vec);
+
+        max.iter().for_each(|val| {
+            if val.key_is_type == "mem" {
+                println!("Maximum RSS: {}K", val.count as f64 / 1024.0);
+            }
+            if val.key_is_type == "vmem" {
+                println!("Maximum VM Size: {}K", val.count as f64 / 1024.0);
+            }
+        });
+
+        avg.iter().for_each(|val| {
+            if val.key_is_type == "mem" {
+                println!("Average RSS: {}K", val.count as f64 / 1024.0);
+            }
+            if val.key_is_type == "vmem" {
+                println!("Average VM Size: {}K", val.count as f64 / 1024.0);
+            }
+        });
+        if print_time_info {
+            println!("/----/ Time /-----/");
+            println!(
+                "Length of step: {}",
+                secs_as_num_to_nice_time(job.time.elapsed as f64)
+            )
+        }
+    });
 }
