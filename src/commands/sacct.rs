@@ -161,14 +161,24 @@ fn steps_info_printer(job: &SacctJob) {
             }
         });
 
+        let mut avg_count: i64 = 0;
+        let mut max_count: i64 = 0;
+
         avg.iter().for_each(|val| {
             if val.key_is_type == "mem" {
                 println!("Average RSS: {}K", val.count as f64 / 1024.0);
+                avg_count = val.count;
             }
             if val.key_is_type == "vmem" {
                 println!("Average VM Size: {}K", val.count as f64 / 1024.0);
+                max_count = val.count;
             }
         });
+
+        // * nprocs
+        println!("Max RAM Usage: {}", max_count * job.required.cpus);
+        println!("Average RAM Usage: {}", avg_count * job.required.cpus);
+
         if print_time_info {
             println!("/----/ Time /-----/");
             println!(
