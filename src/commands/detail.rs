@@ -66,7 +66,7 @@ impl CommandCall for Detail {
                 return ();
             })?;
 
-            let options = vec!["Back", "Cancel Job"];
+            let options = vec!["Back", "-", "-", "-", "Cancel Job", "-", "-"];
             let inner_selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Do you wish to cancel the job?")
                 .items(&options)
@@ -77,9 +77,7 @@ impl CommandCall for Detail {
                     return ();
                 })?;
 
-            if inner_selection == 0 {
-                continue;
-            } else {
+            if inner_selection == 4 {
                 println!(
                     "Cancelling Job with ID {}..",
                     filtered_data[selection - 1].job_id
@@ -95,6 +93,8 @@ impl CommandCall for Detail {
                     })?;
 
                 filtered_data.remove(selection - 1);
+            } else {
+                continue;
             }
         }
     }
