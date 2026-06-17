@@ -1,7 +1,4 @@
-use std::{
-    process::Command,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
+use std::time::{Duration, SystemTime};
 
 use chrono::DateTime;
 
@@ -10,20 +7,17 @@ use crate::{
     commands::command::CommandCall,
     containers::{
         piped_input::{PipedInputHandler, StructOptions},
-        sacct_data::{SacctData, SacctJob, SacctStep, SacctTresAllocReq},
+        sacct_data::{SacctData, SacctJob, SacctTresAllocReq},
         sacct_handler::SacctHandler,
-        slurm_data::SlurmData,
         useful_slurm_job_info::UsefulJobInfo,
     },
     systems::filter::{get_filter_object, print_help_filter_info},
     utils::{
-        json_string_to_struct::json_string_to_struct, print_common_job_info::print_common_job_info,
-        secs_to_nice_time::secs_as_num_to_nice_time,
+        print_common_job_info::print_common_job_info, secs_to_nice_time::secs_as_num_to_nice_time,
     },
 };
 
 pub struct Sacct {
-    pub user: String,
     pub days: Option<i16>,
     pub filter: Option<FilterOptions>,
     pub values: Vec<String>,
@@ -32,9 +26,9 @@ pub struct Sacct {
 impl CommandCall for Sacct {
     fn command(&self, slurm_data: &StructOptions) -> Result<(), ()> {
         let structure: &SacctData = match slurm_data {
-            StructOptions::Slurm(slurm_data) => return Err(()),
+            StructOptions::Slurm(_) => return Err(()),
             StructOptions::Sacct(sacct_data) => sacct_data,
-            StructOptions::Sinfo(sinfo_data) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
         };
 
         let secs_since_epoch: u64 = if let Some(days) = self.days {

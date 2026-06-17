@@ -6,7 +6,6 @@ use crate::{
     cli::FilterOptions,
     commands::{command::CommandCall, get_job_selection_through_menu, line_vec_from_file},
     containers::{
-        self,
         piped_input::{PipedInputHandler, StructOptions},
         slurm_data::{SlurmData, SlurmJob},
         slurm_handler::SlurmHandler,
@@ -29,8 +28,8 @@ impl CommandCall for Detail {
     fn command(&self, structure: &StructOptions) -> Result<(), ()> {
         let matched_struct: &SlurmData = match structure {
             StructOptions::Slurm(slurm_data) => slurm_data,
-            StructOptions::Sacct(sacct_data) => return Err(()),
-            StructOptions::Sinfo(sinfo_data) => return Err(()),
+            StructOptions::Sacct(_) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
         };
 
         if let Some(id) = self.job_id {

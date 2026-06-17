@@ -1,8 +1,7 @@
 use std::{
     collections::HashMap,
-    hash::Hash,
     io::{self, IsTerminal, Read},
-    process::{Command, ExitCode},
+    process::ExitCode,
 };
 
 mod cli;
@@ -18,11 +17,7 @@ use crate::{
         list_directory::ListDirectory, sacct::Sacct, sinfo::Sinfo, system_capacity::SystemCapacity,
         tail_output::TailOutput,
     },
-    containers::{
-        piped_input::{PipedInputHandler, StructOptions},
-        slurm_data::SlurmData,
-    },
-    utils::json_string_to_struct::json_string_to_struct,
+    containers::piped_input::{PipedInputHandler, StructOptions},
 };
 
 use clap::Parser;
@@ -60,8 +55,8 @@ fn main() -> ExitCode {
             if let Some(num_days) = days {
                 command_for_struct_args.insert("days".to_string(), num_days.to_string());
             }
-
-            Box::new(Sacct { user, days, filter, values })
+    
+            Box::new(Sacct { days, filter, values })
         }
     };
 
@@ -100,40 +95,3 @@ fn main() -> ExitCode {
         }
     }
 }
-
-// fn get_structure(cli_all: bool, requires_all_in_queue: bool) -> Result<SlurmData, ()> {
-//     let mut input = String::new();
-//     // The SystemCapacity command is useless if the user tries to use
-//     if io::stdin().is_terminal() || requires_all_in_queue {
-//         let squeue_output = if cli_all || requires_all_in_queue {
-//             Command::new("squeue").arg("--json").output()
-//         } else {
-//             Command::new("squeue").arg("--json").arg("--me").output()
-//         };
-//
-//         match squeue_output {
-//             Ok(v) => {
-//                 input = String::from_utf8_lossy(&v.stdout).to_string();
-//             }
-//             Err(_) => {
-//                 println!("Failed to run squeue command internally, consider piping it in");
-//                 return Err(());
-//             }
-//         }
-//     } else {
-//         let _ = io::stdin().read_to_string(&mut input).map_err(|_| {
-//             println!("Failed to read user input - did you run it like 'squeue --json | UsefulSlurmDataExtractor' ?");
-//             return ExitCode::FAILURE;
-//         });
-//     };
-//
-//     let structure = match json_string_to_struct(input) {
-//         Ok(val) => val,
-//         Err(_) => {
-//             println!("Failed to format input properly - consider piping the data in");
-//             return Err(());
-//         }
-//     };
-//
-//     Ok(structure)
-// }

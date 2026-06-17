@@ -13,8 +13,8 @@ impl CommandCall for SystemCapacity {
     fn command(&self, slurm_data: &StructOptions) -> Result<(), ()> {
         let structure: &SlurmData = match slurm_data {
             StructOptions::Slurm(slurm_data) => slurm_data,
-            StructOptions::Sacct(sacct_data) => return Err(()),
-            StructOptions::Sinfo(sinfo_data) => return Err(()),
+            StructOptions::Sacct(_) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
         };
 
         let running_pending_and_node_counts: Vec<usize> =

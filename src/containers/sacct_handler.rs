@@ -3,7 +3,6 @@ use std::process::Command;
 use chrono::{Duration, Utc};
 
 use crate::{
-    cli::{self, Commands},
     containers::{piped_input::PipedInputHandler, sacct_data::SacctData},
     utils::json_string_to_struct::json_string_to_struct,
 };

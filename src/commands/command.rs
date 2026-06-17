@@ -1,7 +1,4 @@
-use crate::containers::{
-    piped_input::{PipedInputHandler, StructOptions},
-    slurm_data::SlurmData,
-};
+use crate::containers::piped_input::{PipedInputHandler, StructOptions};
 
 pub trait CommandCall {
     fn command(&self, structure: &StructOptions) -> Result<(), ()>;

@@ -24,8 +24,8 @@ impl CommandCall for CancelHelp {
     fn command(&self, structure: &StructOptions) -> Result<(), ()> {
         let matched_struct: &SlurmData = match structure {
             StructOptions::Slurm(slurm_data) => slurm_data,
-            StructOptions::Sacct(sacct_data) => return Err(()),
-            StructOptions::Sinfo(sinfo_data) => return Err(()),
+            StructOptions::Sacct(_) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
         };
 
         let filtered_data: Vec<SlurmJob> =

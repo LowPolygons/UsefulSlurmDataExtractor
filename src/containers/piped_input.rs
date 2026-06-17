@@ -1,11 +1,7 @@
 use std::collections::HashMap;
 
-use clap::Command;
 
-use crate::{
-    cli::Commands,
-    containers::{sacct_data::SacctData, sinfo_data::SinfoData, slurm_data::SlurmData},
-};
+use crate::containers::{sacct_data::SacctData, sinfo_data::SinfoData, slurm_data::SlurmData};
 
 pub enum StructOptions {
     Slurm(SlurmData),

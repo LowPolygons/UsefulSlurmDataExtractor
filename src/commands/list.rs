@@ -22,8 +22,8 @@ impl CommandCall for List {
     fn command(&self, slurm_data: &StructOptions) -> Result<(), ()> {
         let matched_struct: &SlurmData = match slurm_data {
             StructOptions::Slurm(slurm_data) => slurm_data,
-            StructOptions::Sacct(sacct_data) => return Err(()),
-            StructOptions::Sinfo(sinfo_data) => return Err(()),
+            StructOptions::Sacct(_) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
         };
 
         let filtered_data = filtered_data_from_list(matched_struct, &self.filter, &self.values);

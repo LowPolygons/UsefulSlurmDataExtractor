@@ -1,7 +1,6 @@
 use std::process::Command;
 
 use crate::{
-    cli::Commands,
     containers::{piped_input::PipedInputHandler, sinfo_data::SinfoData},
     utils::json_string_to_struct::json_string_to_struct,
 };
