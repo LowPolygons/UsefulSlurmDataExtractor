@@ -1,15 +1,17 @@
 use std::{
     process::Command,
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use chrono::{DateTime, Duration, Utc};
+use chrono::DateTime;
 
 use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
     containers::{
+        piped_input::{PipedInputHandler, StructOptions},
         sacct_data::{SacctData, SacctJob, SacctStep, SacctTresAllocReq},
+        sacct_handler::SacctHandler,
         slurm_data::SlurmData,
         useful_slurm_job_info::UsefulJobInfo,
     },
@@ -28,53 +30,52 @@ pub struct Sacct {
 }
 
 impl CommandCall for Sacct {
-    fn command(&self, _: &SlurmData) -> Result<(), ()> {
-        let start_time: String;
-
-        let target_data = if let Some(days) = self.days {
-            Utc::now() - Duration::days(days as i64)
-        } else {
-            Utc::now() - Duration::days(100)
+    fn command(&self, slurm_data: &StructOptions) -> Result<(), ()> {
+        let structure: &SacctData = match slurm_data {
+            StructOptions::Slurm(slurm_data) => return Err(()),
+            StructOptions::Sacct(sacct_data) => sacct_data,
+            StructOptions::Sinfo(sinfo_data) => return Err(()),
         };
 
-        start_time = target_data.format("%Y-%m-%d").to_string();
-
-        let sacct_output = Command::new("sacct")
-            .args(["--user", &self.user])
-            .args(["--starttime", &start_time])
-            .arg("--json")
-            .output();
-        let json_result: String;
-
-        match sacct_output {
-            Ok(v) => {
-                json_result = String::from_utf8_lossy(&v.stdout).to_string();
-            }
-            Err(_) => {
-                println!("Failed to run sacct command");
-                return Err(());
-            }
+        let secs_since_epoch: u64 = if let Some(days) = self.days {
+            SystemTime::now()
+                .checked_sub(Duration::from_secs(days as u64 * 86400))
+                .ok_or_else(|| ())
+        } else {
+            SystemTime::now()
+                .checked_sub(Duration::from_secs(100 * 86400))
+                .ok_or_else(|| ())
         }
-
-        let structure: SacctData = json_string_to_struct(json_result).map_err(|_e| {
-            println!("Error creating sacct struct");
+        .map_err(|_| {
+            println!("Failed to determine cutoff date internally");
             return ();
-        })?;
+        })?
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .map_err(|_| {
+            println!("Failed to convert a time since unix epoch internally");
+            return ();
+        })?
+        .as_secs();
+
+        let jobs_in_range: Vec<SacctJob> = structure
+            .jobs
+            .clone()
+            .into_iter()
+            .filter(|job| job.time.submission > secs_since_epoch)
+            .collect();
 
         let filtered_jobs = match &self.filter {
             Some(filter_choice) => {
                 if let Some(filter_obj) = get_filter_object(&filter_choice, self.values.clone()) {
-                    structure
-                        .jobs
-                        .clone()
+                    jobs_in_range
                         .into_iter()
                         .filter(|job| filter_obj.does_job_meet_filter_reqs(job))
                         .collect()
                 } else {
-                    structure.jobs.clone()
+                    jobs_in_range
                 }
             }
-            None => structure.jobs.clone(),
+            None => jobs_in_range,
         };
 
         println!("============================");
@@ -127,6 +128,10 @@ impl CommandCall for Sacct {
         }
 
         return Ok(());
+    }
+
+    fn get_piped_input_handler(&self) -> Box<dyn PipedInputHandler> {
+        return Box::new(SacctHandler::new());
     }
 }
 

@@ -6,7 +6,11 @@ use dialoguer::{Select, theme::ColorfulTheme};
 use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
-    containers::slurm_data::{SlurmData, SlurmJob},
+    containers::{
+        piped_input::{PipedInputHandler, StructOptions},
+        slurm_data::{SlurmData, SlurmJob},
+        slurm_handler::SlurmHandler,
+    },
     systems::filter::print_help_filter_info,
     utils::filtered_data_from_list::filtered_data_from_list,
 };
@@ -17,9 +21,15 @@ pub struct CancelHelp {
 }
 
 impl CommandCall for CancelHelp {
-    fn command(&self, structure: &SlurmData) -> Result<(), ()> {
+    fn command(&self, structure: &StructOptions) -> Result<(), ()> {
+        let matched_struct: &SlurmData = match structure {
+            StructOptions::Slurm(slurm_data) => slurm_data,
+            StructOptions::Sacct(sacct_data) => return Err(()),
+            StructOptions::Sinfo(sinfo_data) => return Err(()),
+        };
+
         let filtered_data: Vec<SlurmJob> =
-            filtered_data_from_list(structure, &self.filter, &self.values);
+            filtered_data_from_list(matched_struct, &self.filter, &self.values);
 
         let mut job_ids_to_cancel: Vec<u64> = vec![];
 
@@ -106,11 +116,15 @@ impl CommandCall for CancelHelp {
         }
 
         if filtered_data.len() == 0
-            && structure.jobs.len() != 0
+            && matched_struct.jobs.len() != 0
             && let Some(filter_choice) = &self.filter
         {
-            print_help_filter_info(&structure.jobs, &filter_choice);
+            print_help_filter_info(&matched_struct.jobs, &filter_choice);
         }
         Ok(())
+    }
+
+    fn get_piped_input_handler(&self) -> Box<dyn PipedInputHandler> {
+        return Box::new(SlurmHandler::new());
     }
 }
