@@ -1,9 +1,22 @@
-use crate::{commands::command::CommandCall, containers::slurm_data::SlurmData};
+use crate::{
+    commands::command::CommandCall,
+    containers::{
+        piped_input::{PipedInputHandler, StructOptions},
+        slurm_data::SlurmData,
+        slurm_handler::SlurmHandler,
+    },
+};
 
 pub struct SystemCapacity {}
 
 impl CommandCall for SystemCapacity {
-    fn command(&self, structure: &SlurmData) -> Result<(), ()> {
+    fn command(&self, slurm_data: &StructOptions) -> Result<(), ()> {
+        let structure: &SlurmData = match slurm_data {
+            StructOptions::Slurm(slurm_data) => slurm_data,
+            StructOptions::Sacct(_) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
+        };
+
         let running_pending_and_node_counts: Vec<usize> =
             structure
                 .jobs
@@ -37,5 +50,9 @@ impl CommandCall for SystemCapacity {
             running_pending_and_node_counts[2], running_pending_and_node_counts[3]
         );
         Ok(())
+    }
+
+    fn get_piped_input_handler(&self) -> Box<dyn PipedInputHandler> {
+        return Box::new(SlurmHandler::new());
     }
 }

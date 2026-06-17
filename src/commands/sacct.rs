@@ -1,78 +1,75 @@
-use std::{
-    process::Command,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::time::{Duration, SystemTime};
 
-use chrono::{DateTime, Duration, Utc};
+use chrono::DateTime;
 
 use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
     containers::{
-        sacct_data::SacctData, slurm_data::SlurmData, useful_slurm_job_info::UsefulJobInfo,
+        piped_input::{PipedInputHandler, StructOptions},
+        sacct_data::{SacctData, SacctJob, SacctTresAllocReq},
+        sacct_handler::SacctHandler,
+        useful_slurm_job_info::UsefulJobInfo,
     },
     systems::filter::{get_filter_object, print_help_filter_info},
     utils::{
-        json_string_to_struct::json_string_to_struct, print_common_job_info::print_common_job_info,
-        secs_to_nice_time::secs_as_num_to_nice_time,
+        print_common_job_info::print_common_job_info, secs_to_nice_time::secs_as_num_to_nice_time,
     },
 };
 
 pub struct Sacct {
-    pub user: String,
     pub days: Option<i16>,
     pub filter: Option<FilterOptions>,
     pub values: Vec<String>,
 }
 
 impl CommandCall for Sacct {
-    fn command(&self, _: &SlurmData) -> Result<(), ()> {
-        let start_time: String;
-
-        let target_data = if let Some(days) = self.days {
-            Utc::now() - Duration::days(days as i64)
-        } else {
-            Utc::now() - Duration::days(100)
+    fn command(&self, slurm_data: &StructOptions) -> Result<(), ()> {
+        let structure: &SacctData = match slurm_data {
+            StructOptions::Slurm(_) => return Err(()),
+            StructOptions::Sacct(sacct_data) => sacct_data,
+            StructOptions::Sinfo(_) => return Err(()),
         };
 
-        start_time = target_data.format("%Y-%m-%d").to_string();
-
-        let sacct_output = Command::new("sacct")
-            .args(["--user", &self.user])
-            .args(["--starttime", &start_time])
-            .arg("--json")
-            .output();
-        let json_result: String;
-
-        match sacct_output {
-            Ok(v) => {
-                json_result = String::from_utf8_lossy(&v.stdout).to_string();
-            }
-            Err(_) => {
-                println!("Failed to run sacct command");
-                return Err(());
-            }
+        let secs_since_epoch: u64 = if let Some(days) = self.days {
+            SystemTime::now()
+                .checked_sub(Duration::from_secs(days as u64 * 86400))
+                .ok_or_else(|| ())
+        } else {
+            SystemTime::now()
+                .checked_sub(Duration::from_secs(100 * 86400))
+                .ok_or_else(|| ())
         }
-
-        let structure: SacctData = json_string_to_struct(json_result).map_err(|_e| {
-            println!("Error creating sacct struct");
+        .map_err(|_| {
+            println!("Failed to determine cutoff date internally");
             return ();
-        })?;
+        })?
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .map_err(|_| {
+            println!("Failed to convert a time since unix epoch internally");
+            return ();
+        })?
+        .as_secs();
+
+        let jobs_in_range: Vec<SacctJob> = structure
+            .jobs
+            .clone()
+            .into_iter()
+            .filter(|job| job.time.submission > secs_since_epoch)
+            .collect();
 
         let filtered_jobs = match &self.filter {
             Some(filter_choice) => {
                 if let Some(filter_obj) = get_filter_object(&filter_choice, self.values.clone()) {
-                    structure
-                        .jobs
-                        .clone()
+                    jobs_in_range
                         .into_iter()
                         .filter(|job| filter_obj.does_job_meet_filter_reqs(job))
                         .collect()
                 } else {
-                    structure.jobs.clone()
+                    jobs_in_range
                 }
             }
-            None => structure.jobs.clone(),
+            None => jobs_in_range,
         };
 
         println!("============================");
@@ -100,10 +97,13 @@ impl CommandCall for Sacct {
                 );
 
                 println!("----------------------------");
+                println!("Number of CPUs: {}", job.required.cpus);
                 println!(
                     "Estimated CPU Memory Usage: ~{} GB",
                     (job.required.cpus as f64 * job.required.memory_per_cpu.number as f64) / 1024.0
-                )
+                );
+
+                steps_info_printer(job);
             }
             println!("============================");
 
@@ -123,4 +123,68 @@ impl CommandCall for Sacct {
 
         return Ok(());
     }
+
+    fn get_piped_input_handler(&self) -> Box<dyn PipedInputHandler> {
+        return Box::new(SacctHandler::new());
+    }
+}
+
+fn steps_info_printer(job: &SacctJob) {
+    if job.steps.len() == 0 {
+        return;
+    }
+
+    println!("This job had {} step(s)", job.steps.len());
+
+    let print_time_info = if job.steps.len() > 1 { true } else { false };
+
+    let empty_backup_vec: Vec<SacctTresAllocReq> = Vec::new();
+
+    println!("===== Step Info =====");
+    job.steps.iter().for_each(|step| {
+        println!("Name: {}", step.step.name);
+
+        println!("/----/ Memory Info /-----/");
+        let max = step.tres.requested.get("max").unwrap_or(&empty_backup_vec);
+        let avg = step
+            .tres
+            .requested
+            .get("average")
+            .unwrap_or(&empty_backup_vec);
+
+        max.iter().for_each(|val| {
+            if val.key_is_type == "mem" {
+                println!("Maximum RSS: {}K", val.count as f64 / 1024.0);
+            }
+            if val.key_is_type == "vmem" {
+                println!("Maximum VM Size: {}K", val.count as f64 / 1024.0);
+            }
+        });
+
+        let mut avg_count: i64 = 0;
+        let mut max_count: i64 = 0;
+
+        avg.iter().for_each(|val| {
+            if val.key_is_type == "mem" {
+                println!("Average RSS: {}K", val.count as f64 / 1024.0);
+                avg_count = val.count;
+            }
+            if val.key_is_type == "vmem" {
+                println!("Average VM Size: {}K", val.count as f64 / 1024.0);
+                max_count = val.count;
+            }
+        });
+
+        // * nprocs
+        println!("Max RAM Usage: {}", max_count * job.required.cpus);
+        println!("Average RAM Usage: {}", avg_count * job.required.cpus);
+
+        if print_time_info {
+            println!("/----/ Time /-----/");
+            println!(
+                "Length of step: {}",
+                secs_as_num_to_nice_time(step.time.elapsed as f64)
+            )
+        }
+    });
 }

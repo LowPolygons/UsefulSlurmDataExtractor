@@ -1,7 +1,11 @@
 use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
-    containers::slurm_data::SlurmData,
+    containers::{
+        piped_input::{PipedInputHandler, StructOptions},
+        slurm_data::SlurmData,
+        slurm_handler::SlurmHandler,
+    },
     systems::filter::print_help_filter_info,
     utils::{
         filtered_data_from_list::filtered_data_from_list,
@@ -15,8 +19,14 @@ pub struct List {
 }
 
 impl CommandCall for List {
-    fn command(&self, slurm_data: &SlurmData) -> Result<(), ()> {
-        let filtered_data = filtered_data_from_list(slurm_data, &self.filter, &self.values);
+    fn command(&self, slurm_data: &StructOptions) -> Result<(), ()> {
+        let matched_struct: &SlurmData = match slurm_data {
+            StructOptions::Slurm(slurm_data) => slurm_data,
+            StructOptions::Sacct(_) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
+        };
+
+        let filtered_data = filtered_data_from_list(matched_struct, &self.filter, &self.values);
 
         filtered_data
             .iter()
@@ -35,11 +45,15 @@ impl CommandCall for List {
         println!("==========================");
 
         if filtered_data.len() == 0
-            && slurm_data.jobs.len() != 0
+            && matched_struct.jobs.len() != 0
             && let Some(filter_choice) = &self.filter
         {
-            print_help_filter_info(&slurm_data.jobs, &filter_choice);
+            print_help_filter_info(&matched_struct.jobs, &filter_choice);
         }
         Ok(())
+    }
+
+    fn get_piped_input_handler(&self) -> Box<dyn PipedInputHandler> {
+        return Box::new(SlurmHandler::new());
     }
 }

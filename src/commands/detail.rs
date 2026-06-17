@@ -5,7 +5,11 @@ use dialoguer::{Select, theme::ColorfulTheme};
 use crate::{
     cli::FilterOptions,
     commands::{command::CommandCall, get_job_selection_through_menu, line_vec_from_file},
-    containers::slurm_data::{SlurmData, SlurmJob},
+    containers::{
+        piped_input::{PipedInputHandler, StructOptions},
+        slurm_data::{SlurmData, SlurmJob},
+        slurm_handler::SlurmHandler,
+    },
     systems::filter::print_help_filter_info,
     utils::{
         filtered_data_from_list::filtered_data_from_list,
@@ -21,9 +25,15 @@ pub struct Detail {
 }
 
 impl CommandCall for Detail {
-    fn command(&self, structure: &SlurmData) -> Result<(), ()> {
+    fn command(&self, structure: &StructOptions) -> Result<(), ()> {
+        let matched_struct: &SlurmData = match structure {
+            StructOptions::Slurm(slurm_data) => slurm_data,
+            StructOptions::Sacct(_) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
+        };
+
         if let Some(id) = self.job_id {
-            let job_ids = structure
+            let job_ids = matched_struct
                 .jobs
                 .iter()
                 .fold(Vec::<u64>::new(), |mut vec, job| {
@@ -31,7 +41,7 @@ impl CommandCall for Detail {
                     return vec;
                 });
             if job_ids.contains(&id) {
-                let target_job: &SlurmJob = &structure.jobs[job_ids
+                let target_job: &SlurmJob = &matched_struct.jobs[job_ids
                     .iter()
                     .position(|&item| item.eq(&id))
                     .unwrap_or(job_ids.len() + 1)];
@@ -44,7 +54,7 @@ impl CommandCall for Detail {
             return Ok(());
         }
         let mut filtered_data: Vec<SlurmJob> =
-            filtered_data_from_list(structure, &self.filter, &self.values);
+            filtered_data_from_list(matched_struct, &self.filter, &self.values);
 
         loop {
             let default_options: Vec<String> = vec![String::from("Finish")];
@@ -53,10 +63,10 @@ impl CommandCall for Detail {
 
             if selection == 0 {
                 if filtered_data.len() == 0
-                    && structure.jobs.len() != 0
+                    && matched_struct.jobs.len() != 0
                     && let Some(filter_choice) = &self.filter
                 {
-                    print_help_filter_info(&structure.jobs, &filter_choice);
+                    print_help_filter_info(&matched_struct.jobs, &filter_choice);
                 }
                 return Ok(());
             }
@@ -66,7 +76,7 @@ impl CommandCall for Detail {
                 return ();
             })?;
 
-            let options = vec!["Back", "Cancel Job"];
+            let options = vec!["Back", "-", "-", "-", "Cancel Job", "-", "-"];
             let inner_selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Do you wish to cancel the job?")
                 .items(&options)
@@ -77,9 +87,7 @@ impl CommandCall for Detail {
                     return ();
                 })?;
 
-            if inner_selection == 0 {
-                continue;
-            } else {
+            if inner_selection == 4 {
                 println!(
                     "Cancelling Job with ID {}..",
                     filtered_data[selection - 1].job_id
@@ -95,10 +103,17 @@ impl CommandCall for Detail {
                     })?;
 
                 filtered_data.remove(selection - 1);
+            } else {
+                continue;
             }
         }
     }
+
+    fn get_piped_input_handler(&self) -> Box<dyn PipedInputHandler> {
+        return Box::new(SlurmHandler::new());
+    }
 }
+
 fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     println!("==========================");
     print_common_job_info(target_job)?;

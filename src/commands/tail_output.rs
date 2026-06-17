@@ -3,7 +3,11 @@ use std::{cmp::min, path::Path};
 use crate::{
     cli::FilterOptions,
     commands::{command::CommandCall, get_job_selection_through_menu, line_vec_from_file},
-    containers::slurm_data::{SlurmData, SlurmJob},
+    containers::{
+        piped_input::{PipedInputHandler, StructOptions},
+        slurm_data::{SlurmData, SlurmJob},
+        slurm_handler::SlurmHandler,
+    },
     systems::filter::print_help_filter_info,
     utils::filtered_data_from_list::filtered_data_from_list,
 };
@@ -15,7 +19,12 @@ pub struct TailOutput {
 }
 
 impl CommandCall for TailOutput {
-    fn command(&self, structure: &SlurmData) -> Result<(), ()> {
+    fn command(&self, slurm_data: &StructOptions) -> Result<(), ()> {
+        let structure: &SlurmData = match slurm_data {
+            StructOptions::Slurm(slurm_data) => slurm_data,
+            StructOptions::Sacct(_) => return Err(()),
+            StructOptions::Sinfo(_) => return Err(()),
+        };
         let filtered_data: Vec<SlurmJob> =
             filtered_data_from_list(structure, &self.filter, &self.values)
                 .into_iter()
@@ -65,5 +74,9 @@ impl CommandCall for TailOutput {
         }
 
         Ok(())
+    }
+
+    fn get_piped_input_handler(&self) -> Box<dyn PipedInputHandler> {
+        return Box::new(SlurmHandler::new());
     }
 }
