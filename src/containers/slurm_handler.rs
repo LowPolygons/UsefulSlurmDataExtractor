@@ -15,6 +15,8 @@ impl SlurmHandler {
     }
 }
 
+pub static REQUIRES_ALL_IN_QUEUE_KEY: &str = "requires_all_in_queue";
+
 impl PipedInputHandler for SlurmHandler {
     fn try_make_piped_input_into_struct(&self, input: String) -> Result<StructOptions, String> {
         let structure: SlurmData = json_string_to_struct(input).map_err(|_| {
@@ -30,7 +32,7 @@ impl PipedInputHandler for SlurmHandler {
     ) -> Result<StructOptions, String> {
         let result_string: String;
 
-        let requires_all_jobs: bool = args.contains_key("requires_all_in_queue");
+        let requires_all_jobs: bool = args.contains_key(REQUIRES_ALL_IN_QUEUE_KEY);
 
         let output = if requires_all_jobs {
             Command::new("squeue").arg("--json").output()

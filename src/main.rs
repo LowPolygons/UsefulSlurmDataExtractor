@@ -17,7 +17,11 @@ use crate::{
         list_directory::ListDirectory, sacct::Sacct, sinfo::Sinfo, system_capacity::SystemCapacity,
         tail_output::TailOutput,
     },
-    containers::piped_input::{PipedInputHandler, StructOptions},
+    containers::{
+        piped_input::{PipedInputHandler, StructOptions},
+        sacct_handler::{SACCT_DAYS_KEY, SACCT_USER_KEY},
+        slurm_handler::REQUIRES_ALL_IN_QUEUE_KEY,
+    },
 };
 
 use clap::Parser;
@@ -45,15 +49,15 @@ fn main() -> ExitCode {
             Box::new(List { filter, values }),
         Commands::Sinfo => Box::new(Sinfo {}),
         Commands::SystemCapacity => {
-            command_for_struct_args.insert("requires_all_in_queue".to_string(), "true".to_string());
+            command_for_struct_args.insert(REQUIRES_ALL_IN_QUEUE_KEY.to_string(), "true".to_string());
 
             Box::new(SystemCapacity {})
         }
         Commands::Sacct { user, days, filter, values } => { 
-            command_for_struct_args.insert("user".to_string(), user.clone());
+            command_for_struct_args.insert(SACCT_USER_KEY.to_string(), user.clone());
 
             if let Some(num_days) = days {
-                command_for_struct_args.insert("days".to_string(), num_days.to_string());
+                command_for_struct_args.insert(SACCT_DAYS_KEY.to_string(), num_days.to_string());
             }
     
             Box::new(Sacct { days, filter, values })
@@ -62,11 +66,12 @@ fn main() -> ExitCode {
 
     let piped_input_handler: Box<dyn PipedInputHandler> = command.get_piped_input_handler();
 
+    // No piped input provided
     let formated_struct: StructOptions = if io::stdin().is_terminal() {
         match piped_input_handler.try_run_command_to_get_struct(command_for_struct_args) {
             Ok(v) => v,
             Err(e) => {
-                println!("Error trying to turn piped input into required structure - {e}");
+                println!("Error trying to get structure from command - {e}");
                 return ExitCode::FAILURE;
             }
         }

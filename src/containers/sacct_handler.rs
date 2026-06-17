@@ -17,6 +17,9 @@ impl SacctHandler {
     }
 }
 
+pub static SACCT_USER_KEY: &str = "user";
+pub static SACCT_DAYS_KEY: &str = "days";
+
 impl PipedInputHandler for SacctHandler {
     fn try_make_piped_input_into_struct(&self, input: String) -> Result<StructOptions, String> {
         let structure: SacctData = json_string_to_struct(input).map_err(|_| {
@@ -33,11 +36,11 @@ impl PipedInputHandler for SacctHandler {
         let result_string: String;
 
         let user = args
-            .get("user")
+            .get(SACCT_USER_KEY)
             .ok_or_else(|| ())
             .map_err(|_| "Could not find the user for the sacct command".to_string())?;
 
-        let num_days: i64 = if let Some(days) = args.get("days") {
+        let num_days: i64 = if let Some(days) = args.get(SACCT_DAYS_KEY) {
             days.parse().map_err(|_| {
                 "Provided number of days could not be formatted into number".to_string()
             })?
