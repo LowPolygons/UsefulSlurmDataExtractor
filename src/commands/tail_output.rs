@@ -28,7 +28,7 @@ impl CommandCall for TailOutput {
         let filtered_data: Vec<SlurmJob> =
             filtered_data_from_list(structure, &self.filter, &self.values)
                 .into_iter()
-                .filter(|job| job.job_state != "PENDING")
+                .filter(|job| job.job_state[0] != "PENDING")
                 .collect();
 
         if filtered_data.len() > 0 {

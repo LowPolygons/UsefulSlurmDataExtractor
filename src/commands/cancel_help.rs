@@ -42,8 +42,9 @@ impl CommandCall for CancelHelp {
                 job.name,
                 job.job_id,
                 job.current_working_directory,
-                job.job_state,
-                DateTime::from_timestamp(job.submit_time as i64, 0).unwrap_or(DateTime::default())
+                job.job_state[0],
+                DateTime::from_timestamp(job.submit_time.number as i64, 0)
+                    .unwrap_or(DateTime::default())
             ));
 
             vec

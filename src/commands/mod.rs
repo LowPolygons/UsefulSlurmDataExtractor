@@ -37,7 +37,7 @@ pub fn get_job_selection_through_menu(
     let selection_info = jobs.iter().fold(hardcoded_first_options, |mut vec, job| {
         vec.push(format!(
             "Name and ID: {}, {} | User Name: {} | Status: {}",
-            job.name, job.job_id, job.user_name, job.job_state
+            job.name, job.job_id, job.user_name, job.job_state[0]
         ));
         vec
     });

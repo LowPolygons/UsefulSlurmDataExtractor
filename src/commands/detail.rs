@@ -139,7 +139,7 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     println!("--------------------------");
 
     // Output file if it exists
-    if target_job.job_state != "PENDING" {
+    if target_job.job_state[0] != "PENDING" {
         let output_file = Path::new(&target_job.standard_output);
         let error_file = Path::new(&target_job.standard_error);
 

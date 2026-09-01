@@ -1,5 +1,5 @@
 use crate::containers::{
-    useful_slurm_job_info::UsefulJobInfo, SlurmMeta, SlurmSetInfiniteNumberContainer,
+    SlurmMeta, SlurmSetInfiniteNumberContainer, useful_slurm_job_info::UsefulJobInfo,
 };
 use crate::systems::filter::ExtractsFilterableCategories;
 use std::collections::HashMap;
@@ -17,7 +17,7 @@ pub struct SlurmData {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmJob {
     pub account: String,
-    pub accrue_time: i64,
+    pub accrue_time: SlurmSetInfiniteNumberContainer,
     pub admin_comment: String,
     pub allocating_node: String,
     pub array_job_id: SlurmSetInfiniteNumberContainer,
@@ -48,14 +48,14 @@ pub struct SlurmJob {
     pub cpu_frequency_governor: SlurmSetInfiniteNumberContainer,
     pub cpus_per_tres: String,
     pub cron: String,
-    pub deadline: i64,
+    pub deadline: SlurmSetInfiniteNumberContainer,
     pub delay_boot: SlurmSetInfiniteNumberContainer,
     pub dependency: String,
-    pub derived_exit_code: SlurmSetInfiniteNumberContainer,
-    pub eligible_time: u64,
-    pub end_time: u64,
+    // pub derived_exit_code: SlurmSetInfiniteNumberContainer | New Stupid Type,
+    pub eligible_time: SlurmSetInfiniteNumberContainer,
+    pub end_time: SlurmSetInfiniteNumberContainer,
     pub excluded_nodes: String,
-    pub exit_code: SlurmSetInfiniteNumberContainer,
+    // pub exit_code: SlurmSetInfiniteNumberContainer | Same as derived_exit_code
     pub extra: String,
     pub failed_node: String,
     pub features: String,
@@ -71,8 +71,8 @@ pub struct SlurmJob {
     pub job_id: u64,
     pub job_resources: Option<SlurmJobResources>,
     pub job_size_str: Vec<String>,
-    pub job_state: String,
-    pub last_sched_evaluation: u64,
+    pub job_state: Vec<String>,
+    pub last_sched_evaluation: SlurmSetInfiniteNumberContainer,
     pub licenses: String,
     pub mail_type: Vec<String>,
     pub mail_user: String,
@@ -98,37 +98,37 @@ pub struct SlurmJob {
     pub memory_per_node: SlurmSetInfiniteNumberContainer,
     pub minimum_cpus_per_node: SlurmSetInfiniteNumberContainer,
     pub minimum_tmp_disk_per_node: SlurmSetInfiniteNumberContainer,
-    pub power: HashMap<String, Vec<String>>,
-    pub preempt_time: i64,
-    pub preemptable_time: i64,
-    pub pre_sus_time: i64,
+    // pub power: HashMap<String, Vec<String>>,
+    pub preempt_time: SlurmSetInfiniteNumberContainer,
+    pub preemptable_time: SlurmSetInfiniteNumberContainer,
+    pub pre_sus_time: SlurmSetInfiniteNumberContainer,
     pub hold: bool,
     pub priority: SlurmSetInfiniteNumberContainer,
     pub profile: Vec<String>,
     pub qos: String,
     pub reboot: bool,
     pub required_nodes: String,
-    pub minimum_switches: i64,
+    // pub minimum_switches: i64,
     pub requeue: bool,
-    pub resize_time: i64,
+    pub resize_time: SlurmSetInfiniteNumberContainer,
     pub restart_cnt: i64,
     pub resv_name: String,
     pub scheduled_nodes: String,
     pub selinux_context: String,
     pub shared: Vec<String>,
-    pub exclusive: Vec<String>,
-    pub oversubscribe: bool,
-    pub show_flags: Vec<String>,
+    // pub exclusive: Vec<String>,
+    // pub oversubscribe: bool,
+    // pub show_flags: Vec<String>,
     pub sockets_per_board: i64,
     pub sockets_per_node: SlurmSetInfiniteNumberContainer,
-    pub start_time: u64,
+    pub start_time: SlurmSetInfiniteNumberContainer,
     pub state_description: String,
     pub state_reason: String,
     pub standard_error: String,
     pub standard_input: String,
     pub standard_output: String,
-    pub submit_time: u64,
-    pub suspend_time: i64,
+    pub submit_time: SlurmSetInfiniteNumberContainer,
+    pub suspend_time: SlurmSetInfiniteNumberContainer,
     pub system_comment: String,
     // INFO: the Number here is stored in minutes
     pub time_limit: SlurmSetInfiniteNumberContainer,
@@ -159,7 +159,7 @@ impl ExtractsFilterableCategories for SlurmJob {
     }
 
     fn get_job_status(&self) -> String {
-        self.job_state.clone()
+        self.job_state[0].clone()
     }
 
     fn get_num_nodes(&self) -> u16 {
@@ -193,19 +193,19 @@ impl UsefulJobInfo for SlurmJob {
     }
 
     fn get_job_state(&self) -> &String {
-        &self.job_state
+        &self.job_state[0]
     }
 
     fn get_submit_time(&self) -> u64 {
-        self.submit_time
+        self.submit_time.number as u64
     }
 
     fn get_start_time(&self) -> u64 {
-        self.start_time
+        self.start_time.number as u64
     }
 
     fn get_end_time(&self) -> u64 {
-        self.end_time
+        self.end_time.number as u64
     }
 
     fn get_directory(&self) -> &String {

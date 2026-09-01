@@ -14,14 +14,13 @@ pub mod useful_slurm_job_info;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmMeta {
     pub command: Vec<String>,
-    pub plugins: HashMap<String, String>,
-    #[serde(rename = "Slurm")]
+    pub plugin: HashMap<String, String>,
     pub slurm: SlurmMetaSlurm,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmMetaSlurm {
-    pub version: HashMap<String, i64>,
+    pub version: HashMap<String, String>,
     pub release: String,
 }
 

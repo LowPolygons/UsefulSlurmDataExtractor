@@ -22,7 +22,7 @@ impl CommandCall for SystemCapacity {
                 .jobs
                 .iter()
                 .fold(vec![0, 0, 0, 0], |mut vec, job| {
-                    match job.job_state.as_str() {
+                    match job.job_state[0].as_str() {
                         "RUNNING" => {
                             vec[0] = vec[0] + 1;
                             vec[2] = vec[2] + job.node_count.number as usize;
