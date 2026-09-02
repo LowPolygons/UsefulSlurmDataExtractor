@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 pub mod additional_slurm_job_info;
+pub mod cpu_job_info;
 pub mod piped_input;
 pub mod sacct_data;
 pub mod sacct_handler;

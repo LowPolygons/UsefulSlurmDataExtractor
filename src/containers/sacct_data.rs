@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     containers::{
-        SlurmMeta, SlurmSetInfiniteNumberContainer, useful_slurm_job_info::UsefulJobInfo,
+        SlurmMeta, SlurmSetInfiniteNumberContainer, cpu_job_info::CpuJobInfo,
+        useful_slurm_job_info::UsefulJobInfo,
     },
     systems::filter::ExtractsFilterableCategories,
 };
@@ -56,6 +57,12 @@ pub struct SacctJob {
     pub user: String,
     // Ignoring wckey
     pub working_directory: String,
+}
+
+impl SacctJob {
+    pub fn get_steps(&self) -> &Vec<SacctStep> {
+        &self.steps
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -172,6 +179,20 @@ impl UsefulJobInfo for SacctJob {
 
     fn get_directory(&self) -> &String {
         &self.working_directory
+    }
+
+    fn get_time_limit(&self) -> u64 {
+        self.time.limit.number as u64
+    }
+}
+
+impl CpuJobInfo for SacctJob {
+    fn get_number_of_cpus(&self) -> u64 {
+        self.required.cpus as u64
+    }
+
+    fn get_memory_per_cpu(&self) -> u64 {
+        self.required.memory_per_cpu.number as u64
     }
 }
 

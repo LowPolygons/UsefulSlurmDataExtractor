@@ -11,6 +11,7 @@ pub trait UsefulJobInfo {
     fn get_submit_time(&self) -> u64;
     fn get_start_time(&self) -> u64;
     fn get_end_time(&self) -> u64;
+    fn get_time_limit(&self) -> u64;
     //
     fn get_directory(&self) -> &String;
 }

@@ -218,13 +218,12 @@ impl UsefulJobInfo for SlurmJob {
     fn get_directory(&self) -> &String {
         &self.current_working_directory
     }
-}
-
-impl AdditionalJobInfo for SlurmJob {
     fn get_time_limit(&self) -> u64 {
         self.time_limit.number as u64
     }
+}
 
+impl AdditionalJobInfo for SlurmJob {
     fn get_standard_output(&self) -> &String {
         &self.standard_output
     }
