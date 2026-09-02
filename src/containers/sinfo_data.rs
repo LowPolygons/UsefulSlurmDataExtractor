@@ -73,7 +73,7 @@ impl CpuAndPartitionInfo for SinfoValue {
 pub struct SinfoReason {
     pub description: String,
     pub time: i64,
-    pub user: String,
+    // pub user: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -85,7 +85,7 @@ pub struct Partition {
     pub alternate: String,
     pub tres: HashMap<String, String>,
     pub cluster: String,
-    pub cpus: HashMap<String, i64>,
+    pub cpus: PartitionCpus,
     pub defaults: PartitionDefaults,
     pub grace_time: i64,
     pub maximums: PartitionMaximums,
@@ -95,6 +95,11 @@ pub struct Partition {
     pub priority: HashMap<String, i64>,
     pub timeouts: HashMap<String, SlurmSetInfiniteNumberContainer>,
     pub suspend_time: SlurmSetInfiniteNumberContainer,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct PartitionCpus {
+    pub total: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

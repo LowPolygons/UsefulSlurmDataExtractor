@@ -24,7 +24,7 @@ pub struct SacctJob {
     pub comment: HashMap<String, String>,
     pub allocation_nodes: i64,
     pub array: SacctArray,
-    pub association: HashMap<String, String>,
+    // pub association: HashMap<String, String>,
     pub block: String,
     pub cluster: String,
     pub container: String,
@@ -49,7 +49,7 @@ pub struct SacctJob {
     pub kill_request_user: String,
     // ignoring reservation
     pub script: String,
-    pub state: HashMap<String, String>,
+    pub state: SacctJobState,
     pub steps: Vec<SacctStep>,
     pub submit_line: String,
     pub tres: SacctTres,
@@ -57,6 +57,11 @@ pub struct SacctJob {
     pub user: String,
     // Ignoring wckey
     pub working_directory: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct SacctJobState {
+    pub current: Vec<String>,
 }
 
 impl SacctJob {
@@ -114,10 +119,7 @@ impl ExtractsFilterableCategories for SacctJob {
     }
 
     fn get_job_status(&self) -> String {
-        match self.state.get("current") {
-            Some(v) => v.clone(),
-            None => String::from("Not Found"),
-        }
+        self.state.current[0].clone()
     }
 
     fn get_num_nodes(&self) -> u16 {
@@ -151,10 +153,7 @@ impl UsefulJobInfo for SacctJob {
     }
 
     fn get_job_state(&self) -> &String {
-        match self.state.get("current") {
-            Some(v) => v,
-            None => &self.exit_code.status,
-        }
+        &self.state.current[0]
     }
 
     fn get_submit_time(&self) -> u64 {
@@ -162,14 +161,10 @@ impl UsefulJobInfo for SacctJob {
     }
 
     fn get_start_time(&self) -> u64 {
-        if let Some(state) = self.state.get("current") {
-            if state != "CANCELLED" {
-                self.time.start
-            } else {
-                0
-            }
-        } else {
+        if self.state.current[0] != "CANCELLED" {
             self.time.start
+        } else {
+            0
         }
     }
 
@@ -217,7 +212,7 @@ pub struct SacctRequired {
     pub cpus: i64,
     pub memory_per_cpu: SlurmSetInfiniteNumberContainer,
     pub memory_per_node: SlurmSetInfiniteNumberContainer,
-    pub memory: i64,
+    // pub memory: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -230,8 +225,8 @@ pub struct SacctArray {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SacctExitCode {
-    pub status: String,
-    pub return_code: i64,
+    pub status: Vec<String>,
+    pub return_code: SlurmSetInfiniteNumberContainer,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
