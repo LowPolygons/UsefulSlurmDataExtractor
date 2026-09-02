@@ -6,9 +6,11 @@ use crate::{
     cli::FilterOptions,
     commands::{command::CommandCall, get_job_selection_through_menu, line_vec_from_file},
     containers::{
+        additional_slurm_job_info::AdditionalJobInfo,
         piped_input::{PipedInputHandler, StructOptions},
         slurm_data::{SlurmData, SlurmJob},
         slurm_handler::SlurmHandler,
+        useful_slurm_job_info::UsefulJobInfo,
     },
     systems::filter::print_help_filter_info,
     utils::{
@@ -114,45 +116,51 @@ impl CommandCall for Detail {
     }
 }
 
-fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
+fn print_infomation_about_file<T: UsefulJobInfo + AdditionalJobInfo>(
+    target_job: &T,
+) -> Result<(), String> {
     println!("==========================");
     print_common_job_info(target_job)?;
 
     println!("--------------------------");
 
     println!("Files in working directory:");
-    let working_directory = Path::new(&target_job.current_working_directory);
+    let curr_dir = target_job.get_directory().clone();
+    let working_directory = Path::new(&curr_dir);
     print_working_directory(working_directory, true)?;
 
     println!("--------------------------");
 
     println!(
         "Job max length: {} hours",
-        target_job.time_limit.number / 60.0
+        target_job.get_time_limit() as f64 / 60.0
     );
-    println!("Number of nodes: {}", target_job.node_count.number);
+    println!("Number of nodes: {}", target_job.get_node_count());
     println!(
         "Number of tasks per node: {}",
-        target_job.tasks_per_node.number
+        target_job.get_tasks_per_node()
     );
 
     println!("--------------------------");
 
     // Output file if it exists
-    if target_job.job_state != "PENDING" {
-        let output_file = Path::new(&target_job.standard_output);
-        let error_file = Path::new(&target_job.standard_error);
+    if target_job.get_job_state() != "PENDING" {
+        let std_out = target_job.get_standard_output().clone();
+        let std_err = target_job.get_standard_error().clone();
 
-        println!("Output File: {}", target_job.standard_output);
+        let output_file = Path::new(&std_out);
+        let error_file = Path::new(&std_err);
+
+        println!("Output File: {}", target_job.get_standard_output());
         try_print_any_output_file(output_file, target_job)
             .map_err(|e| format!("Error printing ouput file: {e}"))?;
 
-        if target_job.standard_error == target_job.standard_output {
+        if target_job.get_standard_error() == target_job.get_standard_output() {
             return Ok(());
         }
 
         println!("--------------------------");
-        println!("Error File: {}", target_job.standard_error);
+        println!("Error File: {}", target_job.get_standard_error());
         try_print_any_output_file(error_file, target_job)
             .map_err(|e| format!("Error printing error file: {e}"))?;
     }
@@ -160,14 +168,17 @@ fn print_infomation_about_file(target_job: &SlurmJob) -> Result<(), String> {
     Ok(())
 }
 
-fn try_print_any_output_file(file: &Path, target_job: &SlurmJob) -> Result<(), String> {
+fn try_print_any_output_file<T: AdditionalJobInfo>(
+    file: &Path,
+    target_job: &T,
+) -> Result<(), String> {
     if file.try_exists().map_err(|e| {
         String::from(format!(
             "Couldn't determine if output file exists. You may not have access rights: {}",
             e.to_string()
         ))
     })? {
-        let lines = line_vec_from_file(&target_job.standard_output).map_err(|e| {
+        let lines = line_vec_from_file(&target_job.get_standard_output()).map_err(|e| {
             return e;
         })?;
 

@@ -45,10 +45,10 @@ impl CommandCall for List {
         println!("==========================");
 
         if filtered_data.len() == 0
-            && matched_struct.jobs.len() != 0
+            && matched_struct.get_jobs().len() != 0
             && let Some(filter_choice) = &self.filter
         {
-            print_help_filter_info(&matched_struct.jobs, &filter_choice);
+            print_help_filter_info(&matched_struct.get_jobs(), &filter_choice);
         }
         Ok(())
     }

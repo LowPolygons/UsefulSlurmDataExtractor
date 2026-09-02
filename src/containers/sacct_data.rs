@@ -131,8 +131,8 @@ impl UsefulJobInfo for SacctJob {
         &self.name
     }
 
-    fn get_job_id(&self) -> String {
-        self.job_id.to_string()
+    fn get_job_id(&self) -> u64 {
+        self.job_id as u64
     }
 
     fn get_user_name(&self) -> &String {

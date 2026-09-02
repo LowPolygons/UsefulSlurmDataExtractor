@@ -1,5 +1,6 @@
+use crate::containers::additional_slurm_job_info::AdditionalJobInfo;
 use crate::containers::{
-    useful_slurm_job_info::UsefulJobInfo, SlurmMeta, SlurmSetInfiniteNumberContainer,
+    SlurmMeta, SlurmSetInfiniteNumberContainer, useful_slurm_job_info::UsefulJobInfo,
 };
 use crate::systems::filter::ExtractsFilterableCategories;
 use std::collections::HashMap;
@@ -12,6 +13,12 @@ pub struct SlurmData {
     pub jobs: Vec<SlurmJob>,
     pub warnings: Vec<HashMap<String, String>>,
     pub errors: Vec<HashMap<String, String>>,
+}
+
+impl SlurmData {
+    pub fn get_jobs(&self) -> &Vec<SlurmJob> {
+        &self.jobs
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -180,8 +187,8 @@ impl UsefulJobInfo for SlurmJob {
         &self.name
     }
 
-    fn get_job_id(&self) -> String {
-        self.job_id.to_string()
+    fn get_job_id(&self) -> u64 {
+        self.job_id as u64
     }
 
     fn get_user_name(&self) -> &String {
@@ -210,6 +217,28 @@ impl UsefulJobInfo for SlurmJob {
 
     fn get_directory(&self) -> &String {
         &self.current_working_directory
+    }
+}
+
+impl AdditionalJobInfo for SlurmJob {
+    fn get_time_limit(&self) -> u64 {
+        self.time_limit.number as u64
+    }
+
+    fn get_standard_output(&self) -> &String {
+        &self.standard_output
+    }
+
+    fn get_standard_error(&self) -> &String {
+        &self.standard_error
+    }
+
+    fn get_node_count(&self) -> u64 {
+        self.node_count.number as u64
+    }
+
+    fn get_tasks_per_node(&self) -> u64 {
+        self.tasks_per_node.number as u64
     }
 }
 

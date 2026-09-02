@@ -1,7 +1,7 @@
 pub trait UsefulJobInfo {
     //
     fn get_job_name(&self) -> &String;
-    fn get_job_id(&self) -> String;
+    fn get_job_id(&self) -> u64;
     //
     fn get_user_name(&self) -> &String;
     fn get_user_id(&self) -> String;

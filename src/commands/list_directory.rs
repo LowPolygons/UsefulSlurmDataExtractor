@@ -7,6 +7,7 @@ use crate::{
         piped_input::{PipedInputHandler, StructOptions},
         slurm_data::{SlurmData, SlurmJob},
         slurm_handler::SlurmHandler,
+        useful_slurm_job_info::UsefulJobInfo,
     },
     systems::filter::print_help_filter_info,
     utils::{
@@ -49,7 +50,8 @@ impl CommandCall for ListDirectory {
             return Ok(());
         }
 
-        let working_directory = Path::new(&filtered_data[selection - 1].current_working_directory);
+        let dir_as_string = filtered_data[selection - 1].get_directory().clone();
+        let working_directory = Path::new(&dir_as_string);
 
         print_working_directory(working_directory, false).map_err(|e| {
             println!("Print working directory failure: {e}");
