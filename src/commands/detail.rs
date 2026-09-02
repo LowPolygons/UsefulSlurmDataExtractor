@@ -1,6 +1,5 @@
 use std::{path::Path, process::Command};
 
-use arboard::Clipboard;
 use dialoguer::{Select, theme::ColorfulTheme};
 
 use crate::{
@@ -77,14 +76,7 @@ impl CommandCall for Detail {
                 return ();
             })?;
 
-            let options = vec![
-                "Back",
-                "-",
-                "Copy Directory to Clipboard",
-                "-",
-                "Cancel Job",
-                "-",
-            ];
+            let options = vec!["Back", "-", "-", "-", "Cancel Job", "-", "-"];
             let inner_selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Do you wish to cancel the job?")
                 .items(&options)
@@ -95,26 +87,12 @@ impl CommandCall for Detail {
                     return ();
                 })?;
 
-            match inner_selection {
-                2 => {
-                    let mut clipboard = Clipboard::new().map_err(|_| return ())?;
-
-                    let command = format!(
-                        "{}",
-                        &filtered_data[selection - 1].current_working_directory
-                    );
-                    clipboard.set_text(&command).map_err(|_| return ())?;
-
-                    println!("Copied '{}' to the clipboard", &command);
-
-                    return Ok(());
-                }
-                4 => {
-                    println!(
-                        "Cancelling Job with ID {}..",
-                        filtered_data[selection - 1].job_id
-                    );
-                    let _ = Command::new("scancel")
+            if inner_selection == 4 {
+                println!(
+                    "Cancelling Job with ID {}..",
+                    filtered_data[selection - 1].job_id
+                );
+                let _ = Command::new("scancel")
                     .arg(filtered_data[selection - 1].job_id.to_string())
                     .output()
                     .map_err(|_| {
@@ -124,11 +102,9 @@ impl CommandCall for Detail {
                         return ();
                     })?;
 
-                    filtered_data.remove(selection - 1);
-                }
-                _ => {
-                    continue;
-                }
+                filtered_data.remove(selection - 1);
+            } else {
+                continue;
             }
         }
     }
