@@ -2,10 +2,6 @@
 
 A CLI for extracting useful information from SLURM on HPC systems
 
-## Warning
-
-The main branch is guaranteed to work for Slurm 23. A change inbetween this version and version 26 caused many json changes that broke this version. If this is the case, checkout `slurm-26-05`
-
 ## Usage
 
 Install Cargo on your machine
