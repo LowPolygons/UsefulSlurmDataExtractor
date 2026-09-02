@@ -1,6 +1,7 @@
 use crate::{
     commands::command::CommandCall,
     containers::{
+        additional_slurm_job_info::AdditionalJobInfo,
         piped_input::{PipedInputHandler, StructOptions},
         slurm_data::SlurmData,
         slurm_handler::SlurmHandler,
@@ -25,11 +26,11 @@ impl CommandCall for SystemCapacity {
                     match job.job_state[0].as_str() {
                         "RUNNING" => {
                             vec[0] = vec[0] + 1;
-                            vec[2] = vec[2] + job.node_count.number as usize;
+                            vec[2] = vec[2] + job.get_node_count() as usize;
                         }
                         "PENDING" => {
                             vec[1] = vec[1] + 1;
-                            vec[3] = vec[3] + job.node_count.number as usize;
+                            vec[3] = vec[3] + job.get_node_count() as usize;
                         }
                         _ => {}
                     }

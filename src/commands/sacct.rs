@@ -6,6 +6,7 @@ use crate::{
     cli::FilterOptions,
     commands::command::CommandCall,
     containers::{
+        cpu_job_info::CpuJobInfo,
         piped_input::{PipedInputHandler, StructOptions},
         sacct_data::{SacctData, SacctJob, SacctTresAllocReq},
         sacct_handler::SacctHandler,
@@ -55,7 +56,7 @@ impl CommandCall for Sacct {
             .jobs
             .clone()
             .into_iter()
-            .filter(|job| job.time.submission > secs_since_epoch)
+            .filter(|job| job.get_submit_time() > secs_since_epoch)
             .collect();
 
         let filtered_jobs = match &self.filter {
@@ -88,7 +89,7 @@ impl CommandCall for Sacct {
                 );
                 println!(
                     "Time Limit: {}",
-                    secs_as_num_to_nice_time((job.time.limit.number * 60.0) as f64)
+                    secs_as_num_to_nice_time((job.get_time_limit() as f64 * 60.0) as f64)
                 );
 
                 println!(
@@ -97,10 +98,10 @@ impl CommandCall for Sacct {
                 );
 
                 println!("----------------------------");
-                println!("Number of CPUs: {}", job.required.cpus);
+                println!("Number of CPUs: {}", job.get_number_of_cpus());
                 println!(
                     "Estimated CPU Memory Usage: ~{} GB",
-                    (job.required.cpus as f64 * job.required.memory_per_cpu.number as f64) / 1024.0
+                    (job.required.cpus as f64 * job.get_memory_per_cpu() as f64) / 1024.0
                 );
 
                 steps_info_printer(job);
@@ -130,18 +131,18 @@ impl CommandCall for Sacct {
 }
 
 fn steps_info_printer(job: &SacctJob) {
-    if job.steps.len() == 0 {
+    if job.get_steps().len() == 0 {
         return;
     }
 
-    println!("This job had {} step(s)", job.steps.len());
+    println!("This job had {} step(s)", job.get_steps().len());
 
     let print_time_info = if job.steps.len() > 1 { true } else { false };
 
     let empty_backup_vec: Vec<SacctTresAllocReq> = Vec::new();
 
     println!("===== Step Info =====");
-    job.steps.iter().for_each(|step| {
+    job.get_steps().iter().for_each(|step| {
         println!("Name: {}", step.step.name);
 
         println!("/----/ Memory Info /-----/");
@@ -161,23 +162,26 @@ fn steps_info_printer(job: &SacctJob) {
             }
         });
 
-        let mut avg_count: i64 = 0;
-        let mut max_count: i64 = 0;
+        let mut avg_count: u64 = 0;
+        let mut max_count: u64 = 0;
 
         avg.iter().for_each(|val| {
             if val.key_is_type == "mem" {
                 println!("Average RSS: {}K", val.count as f64 / 1024.0);
-                avg_count = val.count;
+                avg_count = val.count as u64;
             }
             if val.key_is_type == "vmem" {
                 println!("Average VM Size: {}K", val.count as f64 / 1024.0);
-                max_count = val.count;
+                max_count = val.count as u64;
             }
         });
 
         // * nprocs
-        println!("Max RAM Usage: {}", max_count * job.required.cpus);
-        println!("Average RAM Usage: {}", avg_count * job.required.cpus);
+        println!("Max RAM Usage: {}", max_count * job.get_number_of_cpus());
+        println!(
+            "Average RAM Usage: {}",
+            avg_count * job.get_number_of_cpus()
+        );
 
         if print_time_info {
             println!("/----/ Time /-----/");

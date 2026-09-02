@@ -4,9 +4,11 @@ use crate::{
     cli::FilterOptions,
     commands::{command::CommandCall, get_job_selection_through_menu, line_vec_from_file},
     containers::{
+        additional_slurm_job_info::AdditionalJobInfo,
         piped_input::{PipedInputHandler, StructOptions},
         slurm_data::{SlurmData, SlurmJob},
         slurm_handler::SlurmHandler,
+        useful_slurm_job_info::UsefulJobInfo,
     },
     systems::filter::print_help_filter_info,
     utils::filtered_data_from_list::filtered_data_from_list,
@@ -28,14 +30,15 @@ impl CommandCall for TailOutput {
         let filtered_data: Vec<SlurmJob> =
             filtered_data_from_list(structure, &self.filter, &self.values)
                 .into_iter()
-                .filter(|job| job.job_state[0] != "PENDING")
+                .filter(|job| job.get_job_state() != "PENDING")
                 .collect();
 
         if filtered_data.len() > 0 {
             let selection: usize =
                 get_job_selection_through_menu(&filtered_data, Vec::new()).map_err(|_| ())?;
 
-            let output_file = Path::new(&filtered_data[selection].standard_output);
+            let out_path_as_string = filtered_data[selection].get_standard_output().clone();
+            let output_file = Path::new(&out_path_as_string);
 
             if output_file.try_exists().map_err(|e| {
                 println!(
@@ -44,8 +47,8 @@ impl CommandCall for TailOutput {
                 );
                 return ();
             })? {
-                let lines =
-                    line_vec_from_file(&filtered_data[selection].standard_output).map_err(|e| {
+                let lines = line_vec_from_file(&filtered_data[selection].get_standard_output())
+                    .map_err(|e| {
                         println!("Line vec from file error: {e}");
                         return ();
                     })?;

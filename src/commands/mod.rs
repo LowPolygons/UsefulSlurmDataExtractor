@@ -5,7 +5,7 @@ use std::{
 
 use dialoguer::{Select, theme::ColorfulTheme};
 
-use crate::containers::slurm_data::SlurmJob;
+use crate::containers::{slurm_data::SlurmJob, useful_slurm_job_info::UsefulJobInfo};
 
 pub mod cancel_help;
 pub mod command;
@@ -30,14 +30,17 @@ pub fn line_vec_from_file(file_name: &str) -> Result<Vec<String>, String> {
     )?);
 }
 
-pub fn get_job_selection_through_menu(
-    jobs: &Vec<SlurmJob>,
+pub fn get_job_selection_through_menu<T: UsefulJobInfo>(
+    jobs: &Vec<T>,
     hardcoded_first_options: Vec<String>,
 ) -> Result<usize, String> {
     let selection_info = jobs.iter().fold(hardcoded_first_options, |mut vec, job| {
         vec.push(format!(
             "Name and ID: {}, {} | User Name: {} | Status: {}",
-            job.name, job.job_id, job.user_name, job.job_state[0]
+            job.get_job_name(),
+            job.get_job_id(),
+            job.get_user_name(),
+            job.get_job_state()
         ));
         vec
     });

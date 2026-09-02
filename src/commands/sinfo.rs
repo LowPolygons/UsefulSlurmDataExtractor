@@ -2,6 +2,7 @@ use crate::{
     commands::command::CommandCall,
     containers::{
         piped_input::{PipedInputHandler, StructOptions},
+        sinfo_data::CpuAndPartitionInfo,
         sinfo_data::SinfoData,
         sinfo_handler::SinfoHandler,
     },
@@ -19,14 +20,14 @@ impl CommandCall for Sinfo {
 
         println!("Number of nodes: {}", structure.sinfo.len());
 
-        structure.sinfo.iter().for_each(|sinfo| {
+        structure.get_sinfo_data().iter().for_each(|sinfo| {
             println!(
                 "- {} has {} cpus. {} are idle, {} are allocated and {} are other",
-                sinfo.partition.name,
-                sinfo.cpus.total,
-                sinfo.cpus.idle,
-                sinfo.cpus.allocated,
-                sinfo.cpus.other
+                sinfo.get_partition_name(),
+                sinfo.get_total_cpus(),
+                sinfo.get_idle_cpus(),
+                sinfo.get_allocated_cpus(),
+                sinfo.get_misc_cpus()
             );
         });
         Ok(())

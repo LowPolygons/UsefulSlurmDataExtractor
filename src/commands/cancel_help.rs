@@ -10,6 +10,7 @@ use crate::{
         piped_input::{PipedInputHandler, StructOptions},
         slurm_data::{SlurmData, SlurmJob},
         slurm_handler::SlurmHandler,
+        useful_slurm_job_info::UsefulJobInfo,
     },
     systems::filter::print_help_filter_info,
     utils::filtered_data_from_list::filtered_data_from_list,
@@ -39,11 +40,11 @@ impl CommandCall for CancelHelp {
         selection_info = filtered_data.iter().fold(selection_info, |mut vec, job| {
             vec.push(format!(
                 "Name and ID: {}, {} | Directory: {} | Status: {} | Submit Time: {}",
-                job.name,
-                job.job_id,
-                job.current_working_directory,
-                job.job_state[0],
-                DateTime::from_timestamp(job.submit_time.number as i64, 0)
+                job.get_job_name(),
+                job.get_job_id(),
+                job.get_directory(),
+                job.get_job_state(),
+                DateTime::from_timestamp(job.get_submit_time() as i64, 0)
                     .unwrap_or(DateTime::default())
             ));
 
@@ -77,9 +78,12 @@ impl CommandCall for CancelHelp {
             } else if selection == 1 {
                 job_ids_to_cancel = Vec::new();
             } else {
-                job_ids_to_cancel.push(filtered_data[selection - 2].job_id);
+                job_ids_to_cancel.push(filtered_data[selection - 2].get_job_id());
 
-                println!("Job with ID {} added", filtered_data[selection - 2].job_id);
+                println!(
+                    "Job with ID {} added",
+                    filtered_data[selection - 2].get_job_id()
+                );
             }
         }
 
