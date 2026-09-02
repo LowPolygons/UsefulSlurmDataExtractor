@@ -43,7 +43,7 @@ pub fn print_common_job_info(job_data: &impl UsefulJobInfo) -> Result<(), String
             )
         );
     }
-    println!("Job directory: {}", job_data.get_directory());
+    println!("Job directory:\n{}", job_data.get_directory());
     Ok(())
 }
 
