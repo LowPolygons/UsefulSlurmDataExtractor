@@ -4,12 +4,25 @@ use serde::{Deserialize, Serialize};
 
 use crate::containers::{SlurmMeta, SlurmSetInfiniteNumberContainer};
 
+pub trait CpuAndPartitionInfo {
+    fn get_partition_name(&self) -> &String;
+    fn get_total_cpus(&self) -> i64;
+    fn get_idle_cpus(&self) -> i64;
+    fn get_allocated_cpus(&self) -> i64;
+    fn get_misc_cpus(&self) -> i64;
+}
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SinfoData {
     pub meta: SlurmMeta,
     pub warnings: Vec<HashMap<String, String>>,
     pub errors: Vec<HashMap<String, String>>,
     pub sinfo: Vec<SinfoValue>,
+}
+
+impl SinfoData {
+    pub fn get_sinfo_data(&self) -> &Vec<SinfoValue> {
+        &self.sinfo
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -32,6 +45,28 @@ pub struct SinfoValue {
     pub reason: SinfoReason,
     pub reservation: String,
     pub partition: Partition,
+}
+
+impl CpuAndPartitionInfo for SinfoValue {
+    fn get_partition_name(&self) -> &String {
+        &self.partition.name
+    }
+
+    fn get_total_cpus(&self) -> i64 {
+        self.cpus.total
+    }
+
+    fn get_idle_cpus(&self) -> i64 {
+        self.cpus.idle
+    }
+
+    fn get_allocated_cpus(&self) -> i64 {
+        self.cpus.allocated
+    }
+
+    fn get_misc_cpus(&self) -> i64 {
+        self.cpus.other
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
