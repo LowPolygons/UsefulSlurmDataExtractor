@@ -64,7 +64,7 @@ impl PipedInputHandler for SacctHandler {
         result_string = String::from_utf8_lossy(&output.stdout).to_string();
 
         let structure: SacctData = json_string_to_struct(result_string).map_err(|_| {
-            "Faield to format input into internal structure properly - consider piping it in"
+            "Failed to format input into internal structure properly - consider piping it in"
                 .to_string()
         })?;
 
