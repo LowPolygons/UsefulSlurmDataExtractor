@@ -243,7 +243,7 @@ impl AdditionalJobInfo for SlurmJob {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SlurmJobResources {
-    pub nodes: Option<String>,
+    // pub nodes: Option<String>,
     pub allocated_cores: Option<i64>,
     pub allocated_cpus: Option<i64>,
     pub allocated_hosts: Option<i64>,
