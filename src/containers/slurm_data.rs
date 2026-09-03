@@ -134,6 +134,7 @@ pub struct SlurmJob {
     pub standard_error: String,
     pub standard_input: String,
     pub standard_output: String,
+    pub stdout_expanded: Option<String>,
     pub submit_time: SlurmSetInfiniteNumberContainer,
     pub suspend_time: SlurmSetInfiniteNumberContainer,
     pub system_comment: String,
@@ -225,7 +226,13 @@ impl UsefulJobInfo for SlurmJob {
 
 impl AdditionalJobInfo for SlurmJob {
     fn get_standard_output(&self) -> &String {
-        &self.standard_output
+        if let Some(val) = &self.stdout_expanded
+            && !val.is_empty()
+        {
+            &val
+        } else {
+            &self.standard_output
+        }
     }
 
     fn get_standard_error(&self) -> &String {
