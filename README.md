@@ -2,6 +2,8 @@
 
 A CLI for extracting useful information from SLURM on HPC systems
 
+#### Note: This version is for any HPC system using version 26.05, which included some breaking changes to the json
+
 ## Usage
 
 Install Cargo on your machine
@@ -25,7 +27,3 @@ Or
 ```sh
 squeue --json --m | SlurmHelper
 ```
-
-## TODO
-
-Allow the option to pipe data in or to have the program run the commands internally
